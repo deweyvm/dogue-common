@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: scala-actors.jar scala-library.jar scala-swing.jar
+Main-Class: 
+

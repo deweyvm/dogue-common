@@ -10,6 +10,13 @@ import com.deweyvm.gleany.data.Time
 class LogLevel(val marker:String)
 
 object Log {
+  def formatStackTrace(ex:Exception):String = {
+    ("Failure:\nException in thread " + Thread.currentThread.getName + "\n"
+    + ex.toString + '\n'
+    + ex.getStackTraceString)
+  }
+
+
   case object Info extends LogLevel("INFO")
   case object Warn extends LogLevel("WARN")
   case object Error extends LogLevel("ERR ")

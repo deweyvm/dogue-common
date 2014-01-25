@@ -15,8 +15,9 @@ class EnrichedSocket(sock:Socket) {
 
   /**
    * does not catch any exceptions
-   * @return Some(string) where string has been read from the socket or None if no data was available
    *
    */
-  def receive():Option[String] = sock.getInputStream.receive()
+  def receive():NetworkData = sock.getInputStream.receive()
+
+  def receiveAll():NetworkData = sock.getInputStream.receiveAll()
 }

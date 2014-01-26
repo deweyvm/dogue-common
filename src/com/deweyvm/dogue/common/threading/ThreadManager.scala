@@ -1,6 +1,5 @@
 package com.deweyvm.dogue.common.threading
 
-import com.deweyvm.dogue.common.threading.Task
 
 object ThreadManager {
   def spawn[T <: Task](task:T): T = {

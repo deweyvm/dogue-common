@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.logging
 
-import java.io.{FileOutputStream, File}
+import java.io.{PrintStream, FileOutputStream, File}
 import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.gleany.logging.Logger
 import com.deweyvm.dogue.common.Implicits._
@@ -10,7 +10,7 @@ import com.deweyvm.gleany.data.Time
 class LogLevel(val marker:String)
 
 object Log {
-  def formatStackTrace(ex:Exception):String = {
+  def formatStackTrace(ex:Throwable):String = {
     ("Failure:\nException in thread " + Thread.currentThread.getName + "\n"
     + ex.toString + '\n'
     + ex.getStackTraceString)
@@ -51,17 +51,39 @@ object Log {
     useLog(_.log(Error, string))
   }
 
+  private def attachCrasher(file:FileOutputStream) {
+    Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler {
+      def uncaughtException(t: Thread, e: Throwable) {
+        writeCrashToFile(file, e)
+        //let the program crash anyway
+        System.err.print(formatStackTrace(e))
+      }
+    })
+  }
+
+  private def writeCrashToFile(file:FileOutputStream, e:Throwable) {
+    try {
+      file.write(Encoding.toBytes(Log.formatStackTrace(e)))
+      file.close()
+    } catch {
+      case t: Throwable =>
+        System.err.print(formatStackTrace(t))
+
+    }
+  }
+
 }
 
 class Log(dir:String) {
-  Logger.attachCrasher(dir)
+  import Log._
   val dateStr = Time.getString
   val filename = "log_%s" format dateStr
   val logfile = dir + "/" + filename
 
-
   val file:Option[FileOutputStream] = openStream(logfile)
-
+  file foreach { stream =>
+    attachCrasher(stream)
+  }
   private def openStream(path:String):Option[FileOutputStream] = {
     val file = new File(path)
     val dir = file.getParentFile

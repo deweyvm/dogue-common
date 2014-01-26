@@ -5,7 +5,8 @@ import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.dogue.common.io
 import scala.annotation.tailrec
-import com.deweyvm.dogue.common.io.NetworkData.NoneAvailable
+import com.deweyvm.dogue.common.io.NetworkData.{Data, NoneAvailable}
+import com.deweyvm.dogue.common.logging.Log
 
 class NetworkData(val isEmpty:Boolean) {
 
@@ -21,6 +22,7 @@ object NetworkData {
       case _ => this
     }
     override def foreach(f:String=>Unit) = f(string)
+    override def toString = string
   }
 }
 
@@ -52,11 +54,14 @@ class EnrichedInputStream(in:InputStream) {
     import NetworkData._
     val buffLen = 4096
     val buff = new Array[Byte](buffLen)
+    Log.info("Attempting read")
     val amountRead = in.read(buff, 0, buffLen)
-    if (amountRead == 0) {
+    Log.info("Read " + amountRead + " bytes")
+    if (amountRead <= 0) {
       last
     } else {
       val next = last concat Data(Encoding.fromBytes(buff, amountRead))
+      Log.info("Current data " + next.toString)
       receiveNext(next)
     }
   }

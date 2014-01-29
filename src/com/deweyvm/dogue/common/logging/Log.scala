@@ -7,25 +7,33 @@ import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.gleany.data.Time
 
 
-class LogLevel(val marker:String)
+class LogLevel(val marker:String, val loudness:Int) {
+  def <(other:LogLevel):Boolean = {
+    loudness < other.loudness
+  }
+  def <=(other:LogLevel):Boolean = {
+    loudness <= other.loudness
+  }
+}
 
 object Log {
+  private val lock = new scala.concurrent.Lock
   def formatStackTrace(ex:Throwable):String = {
     ("Failure:\nException in thread " + Thread.currentThread.getName + "\n"
     + ex.toString + '\n'
     + ex.getStackTraceString)
   }
 
-
-  case object Info extends LogLevel("INFO")
-  case object Warn extends LogLevel("WARN")
-  case object Error extends LogLevel("ERR ")
-
+  case object Verbose extends LogLevel("LOUD", 4)
+  case object Info extends LogLevel("INFO", 3)
+  case object Warn extends LogLevel("WARN", 2)
+  case object Error extends LogLevel("ERR ", 1)
+  case object Silent extends LogLevel("NONE", 0)
   private var log:Option[Log] = None
 
   //Must be called before logging functions or they will have no effect
-  def setDirectory(dir:String) {
-    log = new Log(dir).some
+  def initLog(dir:String, level:LogLevel) {
+    log = new Log(dir, level).some
   }
 
   private def checkLog() {
@@ -36,7 +44,13 @@ object Log {
 
   private def useLog[A](f:Log=>A) {
     checkLog()
+    lock.acquire()
     log foreach f
+    lock.release()
+  }
+
+  def verbose(string:String) {
+    useLog(_.log(Verbose, string))
   }
 
   def info(string:String) {
@@ -74,7 +88,7 @@ object Log {
 
 }
 
-class Log(dir:String) {
+class Log(dir:String, logLevel:LogLevel) {
   import Log._
   val dateStr = Time.getString
   val filename = "log_%s" format dateStr
@@ -95,11 +109,13 @@ class Log(dir:String) {
     }
     new FileOutputStream(file, false).some
   }
-
-  def log(logLevel:LogLevel, string: String, stackOffset: Int = 7) {
+  def log(level:LogLevel, string: String, stackOffset: Int = 7) {
+    if (logLevel <= level) {
+      return
+    }
     val callStack = Thread.currentThread().getStackTrace
     val className = callStack(stackOffset).getClassName.split("""[.]""").last.replace("$", "")
-    val s = "(%s) [%s] %s: %s".format(Time.getString, logLevel.marker, className, string)
+    val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, className, string)
     println(s)
     file foreach {_.write((s + "\n").getBytes("UTF-8"))}
   }

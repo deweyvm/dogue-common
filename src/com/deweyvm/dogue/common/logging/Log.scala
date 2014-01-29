@@ -30,7 +30,7 @@ object Log {
 
   private def checkLog() {
     if (log.isEmpty) {
-      Console.err.println("Warning: log not set " + Thread.currentThread().getId)
+      println("Warning: log not set " + Thread.currentThread().getId)
     }
   }
 

@@ -98,6 +98,7 @@ class Log(dir:String, logLevel:LogLevel) {
   file foreach { stream =>
     attachCrasher(stream)
   }
+
   private def openStream(path:String):Option[FileOutputStream] = {
     val file = new File(path)
     val dir = file.getParentFile
@@ -109,14 +110,20 @@ class Log(dir:String, logLevel:LogLevel) {
     }
     new FileOutputStream(file, false).some
   }
+
   def log(level:LogLevel, string: String, stackOffset: Int = 7) {
-    if (logLevel <= level) {
-      return
+    try {
+      if (logLevel <= level) {
+        return
+      }
+      val callStack = Thread.currentThread().getStackTrace
+      val className = callStack(stackOffset).getClassName.split("""[.]""").last.replace("$", "")
+      val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, className, string)
+      println(s)
+      file foreach {_.write((s + "\n").getBytes("UTF-8"))}
+    } catch {
+      case t:Throwable =>
+        println(Log.formatStackTrace(t))
     }
-    val callStack = Thread.currentThread().getStackTrace
-    val className = callStack(stackOffset).getClassName.split("""[.]""").last.replace("$", "")
-    val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, className, string)
-    println(s)
-    file foreach {_.write((s + "\n").getBytes("UTF-8"))}
   }
 }

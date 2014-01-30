@@ -24,8 +24,12 @@ class DogueSocket(socket:Socket) {
     writeLock.map(socket.transmit)(s)
   }
 
-  def receive:NetworkData = {
+  def receive():NetworkData = {
     readLock.get(socket.receive)
+  }
+
+  def setTimeout(millis:Int) {
+    readLock.map(socket.setSoTimeout)(millis)
   }
 
 }

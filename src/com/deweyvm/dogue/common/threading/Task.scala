@@ -8,11 +8,13 @@ abstract class Task {
   private var running = true
 
   final def kill() {
-    running = false
-    killAux()
+    if (running) {
+      running = false
+      killAux()
+    }
   }
 
-  //used to do additional kills when this object's kill method is called
+  //used to do additional kill notifications when this object's kill method is called
   def killAux() {
 
   }

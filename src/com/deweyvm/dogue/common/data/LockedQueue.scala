@@ -3,7 +3,7 @@ package com.deweyvm.dogue.common.data
 import scala.concurrent.Lock
 
 class LockedQueue[A] {
-  private val lock = new Lock
+  private val lock = new com.deweyvm.dogue.common.threading.Lock
   private val queue = collection.mutable.Queue[A]()
 
   def length = lockedDo(_.length)
@@ -29,10 +29,7 @@ class LockedQueue[A] {
   }
 
   private def lockedDo[T](f:collection.mutable.Queue[A] => T):T = {
-    lock.acquire()
-    val result = f(queue)
-    lock.release()
-    result
+    lock.map(f)(queue)
   }
 
 }

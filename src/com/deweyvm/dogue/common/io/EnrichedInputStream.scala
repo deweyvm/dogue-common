@@ -67,7 +67,6 @@ class EnrichedInputStream(in:InputStream) {
       last
     } else {
       val next = concat(last, Data(Encoding.fromBytes(buff, amountRead)))
-      Log.info("Current data " + next.toString)
       receiveNext(next)
     }
   }

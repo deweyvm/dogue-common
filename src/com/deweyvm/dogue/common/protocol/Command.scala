@@ -4,7 +4,6 @@ import com.deweyvm.dogue.common.parsing.CommandParser
 
 object Command {
 
-
   def test() {
     val parser = new CommandParser
     val tests = List(
@@ -33,7 +32,6 @@ object Command {
 }
 
 trait DogueMessage
-
 case class Command(op:String, source:String, dest:String, args:Vector[String]) extends DogueMessage {
   override def toString:String = {
     if (args.length == 0) {
@@ -41,9 +39,7 @@ case class Command(op:String, source:String, dest:String, args:Vector[String]) e
     } else {
       "/%s %s %s %s" format (op, source, dest, args.mkString(" "))
     }
-
   }
-
 }
 
 case class Invalid(msg:String) extends DogueMessage

@@ -17,7 +17,6 @@ class CommandParser extends RegexParsers {
   }
 
   def parseToOpt[T](parseResult:this.ParseResult[T]): Option[T] = {
-    Log.info(parseResult.toString)
     if (parseResult.successful) {
       parseResult.get.some
     } else {

@@ -10,18 +10,19 @@ import com.deweyvm.dogue.common.data.LockedQueue
 import com.deweyvm.dogue.common.logging.Log
 
 
-class DogueServer(port:Int) {
+class DogueServer(name:String, port:Int) {
   private val server = new ServerSocket(port)
   def accept():DogueSocket = {
-    new DogueSocket(server.accept())
+    new DogueSocket(name, server.accept())
   }
 }
 
 object DogueSocket {
-  def create(host:String, port:Int) = new DogueSocket(new Socket(host, port))
+  def create(serverName:String, host:String, port:Int) =
+    new DogueSocket(serverName, new Socket(host, port))
 }
 
-class DogueSocket(socket:Socket) {
+class DogueSocket(val serverName:String, socket:Socket) {
   val readLock = new Lock()
   val writeLock = new Lock()
   var nextLine = ""
@@ -39,18 +40,12 @@ class DogueSocket(socket:Socket) {
   private def accept() {
     val buffer = ArrayBuffer[String]()
     receive() foreach { next =>
-      Log.info("next: " + next.replace("\0", "\\0"))
-
       val lines = next.esplit('\0')
-      lines foreach { l =>
-        Log.info("split:    " + l.replace("\0", "\\0"))
-      }
       val last = lines(lines.length - 1)
       val first = lines.dropRight(1)
       for (s <- first) {
         nextLine += s
         buffer += nextLine
-        Log.info(nextLine)
         nextLine = ""
       }
 

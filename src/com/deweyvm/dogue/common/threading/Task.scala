@@ -4,7 +4,6 @@ import com.deweyvm.dogue.common.logging.Log
 
 
 abstract class Task {
-
   private var running = true
 
   final def kill() {

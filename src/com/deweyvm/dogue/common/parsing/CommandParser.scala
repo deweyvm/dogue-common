@@ -10,8 +10,9 @@ class CommandParser extends RegexParsers {
   override type Elem = Char
   def op = """/\w+""".r
   def word = """\w+""".r
+  def arg = """[^\s\x{0}]+""".r
   def space = """[ \t\n\r\v]+""".r
-  def args = rep(word)
+  def args = rep(arg)
   def command = op~word~word~args ^^ {  case op~src~dest~args =>
       Command(op.substring(1), src, dest, args.toVector)
   }

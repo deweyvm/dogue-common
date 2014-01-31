@@ -21,7 +21,7 @@ object TestManager {
       case TestFail(msg) =>
         println("[FAIL] %15s" format test.name)
         if (failFirst) {
-          throw new RuntimeException("Test failure: " + test.name)
+          throw new RuntimeException("Test failure: " + test.name + "\n" + msg)
         }
     }
 

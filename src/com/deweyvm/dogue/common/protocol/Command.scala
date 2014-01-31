@@ -13,7 +13,9 @@ object Command {
       ("/test from to a", true),
       ("/test a", false),
       ("/ a b c d", false),
-      ("/t a b", true)
+      ("/t a b", true),
+      ("/say 6bdaeba28f26b3e3 6bdaeba28f26b3e3 ?", true),
+      ("/say 5e01405ec801cfa4 5e01405ec801cfa4 HUH?", true)
 
     )
 
@@ -41,6 +43,10 @@ case class Command(op:String, source:String, dest:String, args:Vector[String]) e
     } else {
       "%s %s" format (front, args.mkString(" "))
     }
+  }
+
+  def toSay:String = {
+    args.mkString(" ")
   }
 }
 

@@ -2,7 +2,7 @@ package com.deweyvm.dogue.common.logging
 
 import java.io.{PrintStream, FileOutputStream, File}
 import com.deweyvm.dogue.common.data.Encoding
-import com.deweyvm.gleany.logging.Logger
+import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.gleany.data.Time
 
@@ -16,8 +16,9 @@ class LogLevel(val marker:String, val loudness:Int) {
   }
 }
 
+
 object Log {
-  private val lock = new scala.concurrent.Lock
+  private val lock = new Lock
   def formatStackTrace(ex:Throwable):String = {
     ("Failure:\nException in thread " + Thread.currentThread.getName + "\n"
     + ex.toString + '\n'
@@ -44,9 +45,9 @@ object Log {
 
   private def useLog[A](f:Log=>A) {
     checkLog()
-    lock.acquire()
-    log foreach f
-    lock.release()
+    lock.foreach[Unit](_ =>
+      log foreach f
+    )()
   }
 
   def verbose(string:String) {
@@ -59,6 +60,10 @@ object Log {
 
   def warn(string:String) {
     useLog(_.log(Warn, string))
+  }
+
+  def thing(source:String)(message:String) {
+    useLog(_.log(Warn, source + message))
   }
 
   def error(string:String) {
@@ -86,6 +91,10 @@ object Log {
     }
   }
 
+  def testLog(className:String) {
+    Log.info(className)
+  }
+
 }
 
 class Log(dir:String, logLevel:LogLevel) {
@@ -111,15 +120,35 @@ class Log(dir:String, logLevel:LogLevel) {
     new FileOutputStream(file, false).some
   }
 
-  def log(level:LogLevel, string: String, stackOffset: Int = 7) {
+  /**
+   * The jvm mangles scala class names in an implementation specific way. Here
+   * we at least try to account for the ones we know of.
+   * @param name
+   */
+  private def transformName(name:String):String = {
+    val maxNameLength = 16
+    val className = name.split("\\$", 2)(0).split("anonfun", 2)(0)
+    val toFormat =
+      if (className.length > maxNameLength) {
+        className.substring(0, maxNameLength - 3) + "..."
+      } else {
+        className
+      }
+    val formatString = "%" + maxNameLength + "s"
+    formatString format toFormat
+  }
+
+  def log(level:LogLevel, string: String, stackOffset: Int = 11) {
+
     try {
       if (logLevel < level) {
+
         return
       }
       val callStack = Thread.currentThread().getStackTrace
-      val className = callStack(stackOffset).getClassName.split("""[.]""").last.replace("$", "")
-      val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, className, string)
-      println(s.replace("\0", "\\0"))
+      val className = callStack(stackOffset).getClassName.split("""[.]""").last
+      val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, transformName(className), string).replace("\0", "\\0")
+      println(s)
       file foreach {_.write((s + "\n").getBytes("UTF-8"))}
     } catch {
       case t:Throwable =>

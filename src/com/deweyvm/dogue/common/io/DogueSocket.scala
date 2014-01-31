@@ -39,12 +39,17 @@ class DogueSocket(socket:Socket) {
   private def accept() {
     val buffer = ArrayBuffer[String]()
     receive() foreach { next =>
+      Log.info("next: " + next.replace("\0", "\\0"))
+
       val lines = next.esplit('\0')
+      lines foreach { l =>
+        Log.info("split:    " + l.replace("\0", "\\0"))
+      }
       val last = lines(lines.length - 1)
       val first = lines.dropRight(1)
       for (s <- first) {
         nextLine += s
-        buffer += nextLine + '\0'
+        buffer += nextLine
         Log.info(nextLine)
         nextLine = ""
       }

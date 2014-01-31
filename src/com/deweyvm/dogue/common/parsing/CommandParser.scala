@@ -12,8 +12,7 @@ class CommandParser extends RegexParsers {
   def word = """\w+""".r
   def space = """[ \t\n\r\v]+""".r
   def args = rep(word)
-  def end = """\x{0}""".r
-  def command = op~word~word~args~end ^^ {  case op~src~dest~args~_ =>
+  def command = op~word~word~args ^^ {  case op~src~dest~args =>
       Command(op.substring(1), src, dest, args.toVector)
   }
 

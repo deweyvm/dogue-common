@@ -119,7 +119,7 @@ class Log(dir:String, logLevel:LogLevel) {
       val callStack = Thread.currentThread().getStackTrace
       val className = callStack(stackOffset).getClassName.split("""[.]""").last.replace("$", "")
       val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, className, string)
-      println(s)
+      println(s.replace("\0", "\\0"))
       file foreach {_.write((s + "\n").getBytes("UTF-8"))}
     } catch {
       case t:Throwable =>

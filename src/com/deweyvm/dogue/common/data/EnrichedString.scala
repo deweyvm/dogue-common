@@ -34,11 +34,11 @@ object EnrichedString {
 
     tests foreach { case (line, sep, count) =>
       val sp = line.esplit(sep)
-      printf("line to split: <%s>\n", line)
+      //printf("line to split: <%s>\n", line)
       for (s <- sp) {
-        printf("    <%s>\n", s)
+        //printf("    <%s>\n", s)
       }
-      printf("%d ==? %d\n\n", sp.length, count)
+      //printf("%d ==? %d\n\n", sp.length, count)
       assert(sp.length == count)
     }
   }

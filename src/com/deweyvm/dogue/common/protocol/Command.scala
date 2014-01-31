@@ -19,7 +19,8 @@ object Command {
 
 
 
-    def parse = (s:String) => parser.parseAll(parser.command, s)
+    def parse(s:String) = parser.parseAll(parser.command, s)
+
     tests foreach { case (s, expected) =>
       val parsed = parse(s)
       val index = (tests map {_._1}).indexOf(s)

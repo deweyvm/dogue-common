@@ -20,7 +20,7 @@ class EnrichedSocket(sock:Socket) {
    * does not catch any exceptions
    *
    */
-  def receive():NetworkData = sock.getInputStream.receive()
+  def receive():NetworkData[String] = sock.getInputStream.receive()
 
-  def receiveAll():NetworkData = sock.getInputStream.receiveAll()
+  def receiveAll():NetworkData[String] = sock.getInputStream.receiveAll()
 }

@@ -3,6 +3,11 @@ package com.deweyvm.dogue.common.io
 import java.net.{ServerSocket, Socket}
 import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.protocol.{DogueMessage, Command}
+import scala.collection.mutable.ArrayBuffer
+import com.deweyvm.dogue.common.parsing.CommandParser
+import com.deweyvm.dogue.common.data.LockedQueue
+import com.deweyvm.dogue.common.logging.Log
 
 
 class DogueServer(port:Int) {
@@ -19,13 +24,39 @@ object DogueSocket {
 class DogueSocket(socket:Socket) {
   val readLock = new Lock()
   val writeLock = new Lock()
-
-  def transmit(s:String) {
-    writeLock.map(socket.transmit)(s)
+  var nextLine = ""
+  val commandQueue = new LockedQueue[DogueMessage]
+  val parser = new CommandParser
+  def transmit(s:DogueMessage) {
+    writeLock.map(socket.transmit)(s.toString)
   }
 
-  def receive():NetworkData = {
+  private def receive():NetworkData[String] = {
     readLock.get(socket.receive)
+  }
+
+  //in the future might want to have this run more often than it is queried
+  private def accept() {
+    val buffer = ArrayBuffer[String]()
+    receive() foreach { next =>
+      val lines = next.esplit('\0')
+      val last = lines(lines.length - 1)
+      val first = lines.dropRight(1)
+      for (s <- first) {
+        nextLine += s
+        buffer += nextLine + '\0'
+        Log.info(nextLine)
+        nextLine = ""
+      }
+
+      nextLine = last
+    }
+    commandQueue.enqueueAll((buffer map parser.parseMessage).toVector)
+  }
+
+  def receiveCommands():Vector[DogueMessage] = {
+    accept()
+    commandQueue.dequeueAll()
   }
 
   def setTimeout(millis:Int) {

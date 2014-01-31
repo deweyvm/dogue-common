@@ -1,5 +1,10 @@
 package com.deweyvm.dogue.common.data
 
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Prop.forAll
+import scala.util.Random
+import com.deweyvm.dogue.common.testing.Test
+
 object Array2d {
   def tabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
     val elts = Vector.tabulate(cols*rows) { k =>
@@ -20,19 +25,33 @@ object Array2d {
   def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
 
   def test() {
-    val cols = 100
-    val rows = 100
-    val a = tabulate(rows, cols){ case (i, j) => scala.math.random}
-    for (i <- 0 until rows; j <- 0 until cols) {
-      val x = a.unsafeGet(i, j)
-      val (ii, jj) = indexToCoords(coordsToIndex(i, j, cols), cols)
-      val y = a.unsafeGet(ii, jj)
-      assert(x == y)
+    implicit def arbA2d:Arbitrary[Array2d[Int]] =
+      Arbitrary {
+        for {
+          rows <- Gen.choose(1,100)
+          cols <- Gen.choose(1,100)
+        } yield {
+          tabulate(cols, rows){ case (i, j) =>
+            Random.nextInt()
+          }
+        }
+      }
+    val prop = forAll { a:Array2d[Int] =>
+      var fail = true
+      a.foreach( {case (i, j, t) =>
+        val x = a.unsafeGet(i, j)
+        val (ii, jj) = indexToCoords(coordsToIndex(i, j, a.cols), a.cols)
+        val y = a.unsafeGet(ii, jj)
+        fail &&= x == y
+      })
+      fail
+
     }
+    Test.runScalaCheck(prop)
   }
 }
 
-class Array2d[+T](elements:Vector[T], cols:Int, rows:Int) {
+class Array2d[+T](elements:Vector[T], val cols:Int, val rows:Int) {
   import Array2d._
   def foreach(f:(Int,Int,T) => Unit) {
     elements.zipWithIndex foreach { case (t, k) =>

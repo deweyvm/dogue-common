@@ -1,14 +1,15 @@
 package com.deweyvm.dogue.common.testing
 
 import com.deweyvm.dogue.common.protocol.Command
-import com.deweyvm.dogue.common.data.{EnrichedString, Array2d}
+import com.deweyvm.dogue.common.data.{LockedQueue, EnrichedString, Array2d}
 import com.deweyvm.dogue.common.logging.Log
 
 object TestManager {
   private val tests = Vector[(() => Unit, String)](
     (Command.test, "Command"),
     (Array2d.test, "Array2d"),
-    (EnrichedString.test, "EnrichedString")
+    (EnrichedString.test, "EnrichedString"),
+    (LockedQueue.test, "LockedQueue")
   )
   def runAll(failFirst:Boolean) {
     tests map {case (f, n) => new Test {

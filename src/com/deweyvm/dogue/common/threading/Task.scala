@@ -14,6 +14,10 @@ abstract class Task {
     }
   }
 
+  def init() {
+
+  }
+
   //used to do additional kill notifications when this object's kill method is called
   def killAux() {
 
@@ -28,6 +32,7 @@ abstract class Task {
   }
 
   final def execute() {
+    init()
     try {
       while (running && isRunning) {
         doWork()

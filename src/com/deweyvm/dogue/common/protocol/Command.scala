@@ -34,10 +34,11 @@ object Command {
 trait DogueMessage
 case class Command(op:String, source:String, dest:String, args:Vector[String]) extends DogueMessage {
   override def toString:String = {
+    val front = "/%s %s %s" format (op, source, dest)
     if (args.length == 0) {
-      "/%s %s %s" format (op, source, dest)
+      front
     } else {
-      "/%s %s %s %s" format (op, source, dest, args.mkString(" "))
+      "%s %s" format (front, args.mkString(" "))
     }
   }
 }

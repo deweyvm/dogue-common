@@ -3,17 +3,28 @@ package com.deweyvm.dogue.common.io
 import java.net.{ServerSocket, Socket}
 import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
-import com.deweyvm.dogue.common.protocol.{DogueMessage, Command}
+import com.deweyvm.dogue.common.protocol.DogueMessage
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.parsing.CommandParser
 import com.deweyvm.dogue.common.data.LockedQueue
-import com.deweyvm.dogue.common.logging.Log
 
 
 class DogueServer(name:String, port:Int) {
   private val server = new ServerSocket(port)
   def accept():DogueSocket = {
     new DogueSocket(name, server.accept())
+  }
+
+  def reuseAddress() {
+    server.setReuseAddress(true)
+  }
+
+  def setTimeout(millis:Int) {
+    server.setSoTimeout(millis)
+  }
+
+  def close() {
+    server.close()
   }
 }
 

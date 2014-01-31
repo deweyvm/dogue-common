@@ -114,7 +114,6 @@ class Log(dir:String, logLevel:LogLevel) {
   def log(level:LogLevel, string: String, stackOffset: Int = 7) {
     try {
       if (logLevel < level) {
-        println("%d < %d" format (logLevel.loudness, level.loudness))
         return
       }
       val callStack = Thread.currentThread().getStackTrace

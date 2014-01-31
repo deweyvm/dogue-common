@@ -15,4 +15,11 @@ class Lock {
     lock.release()
     result
   }
+
+  def foreach[T](f:T => Unit):T => Unit = { case t =>
+    lock.acquire()
+    f(t)
+    lock.release()
+
+  }
 }

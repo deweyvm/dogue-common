@@ -15,7 +15,8 @@ object Command {
       ("/ a b c d", false),
       ("/t a b", true),
       ("/say 6bdaeba28f26b3e3 6bdaeba28f26b3e3 ?", true),
-      ("/say 5e01405ec801cfa4 5e01405ec801cfa4 HUH?", true)
+      ("/say 5e01405ec801cfa4 5e01405ec801cfa4 HUH?", true),
+      ("/greet flare &unknown& identify", true)
 
     )
 
@@ -44,6 +45,9 @@ case class Command(op:String, source:String, dest:String, args:Vector[String]) e
       "%s %s" format (front, args.mkString(" "))
     }
   }
+
+  def this(op:String, source:String, dest:String, args:String*) =
+    this(op, source, dest, args.toVector)
 
   def toSay:String = {
     args.mkString(" ")

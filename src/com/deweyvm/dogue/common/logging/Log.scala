@@ -25,6 +25,7 @@ object Log {
     + ex.getStackTraceString)
   }
 
+  case object All extends LogLevel("ALL ", Int.MaxValue)
   case object Verbose extends LogLevel("LOUD", 4)
   case object Info extends LogLevel("INFO", 3)
   case object Warn extends LogLevel("WARN", 2)
@@ -50,24 +51,24 @@ object Log {
     )()
   }
 
-  def verbose(string:String) {
-    useLog(_.log(Verbose, string))
+  def all(s:String) {
+    useLog(_.log(All, s))
   }
 
-  def info(string:String) {
-    useLog(_.log(Info, string))
+  def verbose(s:String) {
+    useLog(_.log(Verbose, s))
   }
 
-  def warn(string:String) {
-    useLog(_.log(Warn, string))
+  def info(s:String) {
+    useLog(_.log(Info, s))
   }
 
-  def thing(source:String)(message:String) {
-    useLog(_.log(Warn, source + message))
+  def warn(s:String) {
+    useLog(_.log(Warn, s))
   }
 
-  def error(string:String) {
-    useLog(_.log(Error, string))
+  def error(s:String) {
+    useLog(_.log(Error, s))
   }
 
   private def attachCrasher(file:FileOutputStream) {

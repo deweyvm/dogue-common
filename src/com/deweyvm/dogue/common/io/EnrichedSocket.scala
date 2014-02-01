@@ -12,7 +12,6 @@ class EnrichedSocket(sock:Socket) {
    * does not catch any exceptions
    */
   def transmit(string:String) {
-    Log.info("transmitting " + string)
     sock.getOutputStream.transmit(string)
   }
 

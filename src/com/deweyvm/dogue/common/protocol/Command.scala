@@ -54,4 +54,6 @@ case class Command(op:String, source:String, dest:String, args:Vector[String]) e
   }
 }
 
-case class Invalid(msg:String) extends DogueMessage
+case class Invalid(text:String) extends DogueMessage {
+  override def toString:String = "Invalid(%s)" format text
+}

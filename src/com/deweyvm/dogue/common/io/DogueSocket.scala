@@ -7,6 +7,7 @@ import com.deweyvm.dogue.common.protocol.DogueMessage
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.parsing.CommandParser
 import com.deweyvm.dogue.common.data.LockedQueue
+import com.deweyvm.dogue.common.logging.Log
 
 
 class DogueServer(name:String, port:Int) {
@@ -40,6 +41,7 @@ class DogueSocket(val serverName:String, socket:Socket) {
   val commandQueue = new LockedQueue[DogueMessage]
   val parser = new CommandParser
   def transmit(s:DogueMessage) {
+    Log.info("Transmit: \"%s\"" format s.toString)
     writeLock.map(socket.transmit)(s.toString)
   }
 
@@ -67,7 +69,12 @@ class DogueSocket(val serverName:String, socket:Socket) {
 
   def receiveCommands():Vector[DogueMessage] = {
     accept()
-    commandQueue.dequeueAll()
+
+    val result = commandQueue.dequeueAll()
+    result foreach {cmd =>
+      Log.info("Received: \"%s\"" format cmd.toString)
+    }
+    result
   }
 
   def setTimeout(millis:Int) {

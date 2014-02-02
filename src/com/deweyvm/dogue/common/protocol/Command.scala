@@ -27,7 +27,13 @@ case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) 
     if (args.length == 0) {
       front
     } else {
-      "%s %s" format (front, args.mkString(" "))
+      "%s %s" format (front, args map { a =>
+        if (a.contains(' ')) {
+          "\"%s\"" format a
+        } else {
+          a
+        }
+      } mkString " ")
     }
   }
 

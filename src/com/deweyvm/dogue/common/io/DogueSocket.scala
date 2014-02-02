@@ -59,6 +59,7 @@ class DogueSocket(val serverName:String, socket:Socket) {
       for (s <- first) {
         nextLine += s
         buffer += nextLine
+        Log.warn("Next line " + nextLine)
         nextLine = ""
       }
 

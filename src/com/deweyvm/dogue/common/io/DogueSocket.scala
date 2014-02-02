@@ -64,7 +64,7 @@ class DogueSocket(val serverName:String, socket:Socket) {
 
       nextLine = last
     }
-    commandQueue.enqueueAll((buffer map parser.parseMessage).toVector)
+    commandQueue.enqueueAll((buffer map parser.getCommand).toVector)
   }
 
   def receiveCommands():Vector[DogueMessage] = {

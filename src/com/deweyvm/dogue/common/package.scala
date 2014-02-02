@@ -6,7 +6,6 @@ import com.deweyvm.dogue.common.data.{EnrichedNumber, EnrichedFunction2, Enriche
 import com.deweyvm.dogue.common.io.{EnrichedInputStream, EnrichedOutputStream, EnrichedSocket}
 import java.io.{OutputStream, InputStream}
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
 
 package object common {
   object Implicits {
@@ -23,30 +22,6 @@ package object common {
   object Functions {
     implicit def function22EnrichedFunction2[A,B](f:A=>B):EnrichedFunction2[A,B] = new EnrichedFunction2(f)
 
-
-  }
-
-  object Macros {
-
-    def LINE: Int = macro lineImpl
-
-    def lineImpl(c: Context): c.Expr[Int] = {
-      import c.universe._
-
-      val line = Literal(Constant(c.enclosingPosition.line))
-
-      c.Expr[Int](line)
-    }
-
-    def FILE: String = macro fileImpl
-
-    def fileImpl(c: Context): c.Expr[String] = {
-      import c.universe._
-
-      val absolute: String = c.enclosingPosition.source.file.file.getName.split('.')(0)
-
-      c.Expr[String](Literal(Constant(absolute)))
-    }
 
   }
 }

@@ -1,6 +1,8 @@
 package com.deweyvm.dogue.common.protocol
 
 import com.deweyvm.dogue.common.parsing.CommandParser
+import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.logging.Log
 
 trait DogueOp {
   override def toString = getClass.getSimpleName.toLowerCase.replace("$","")
@@ -14,7 +16,9 @@ object DogueOp {
 }
 
 
-trait DogueMessage
+trait DogueMessage {
+  def toOption:Option[Command]
+}
 
 case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) extends DogueMessage {
   override def toString:String = {
@@ -29,11 +33,13 @@ case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) 
   def this(op:DogueOp, source:String, dest:String, args:String*) =
     this(op, source, dest, args.toVector)
 
-  def toSay:String = {
-    args.mkString(" ")
-  }
+  override def toOption = this.some
 }
 
-case class Invalid(text:String) extends DogueMessage {
-  override def toString:String = "Invalid(%s)" format text
+case class Invalid(text:String, parseMessage:String) extends DogueMessage {
+  override def toString:String = "Invalid(%s): %s" format(text, parseMessage)
+  override def toOption = None
+  def warn() {
+    Log.warn("Invalid command: \"%s\"\n%s" format (text, parseMessage))
+  }
 }

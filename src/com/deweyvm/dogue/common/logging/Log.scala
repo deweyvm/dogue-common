@@ -5,6 +5,7 @@ import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.gleany.data.Time
+import com.deweyvm.gleany.graphics.Color
 
 
 class LogLevel(val marker:String, val loudness:Int) {
@@ -71,9 +72,16 @@ object Log {
     useLog(_.log(Error, s))
   }
 
+  def flush() {
+    useLog(_.flush())
+  }
+
   private def attachCrasher(file:FileOutputStream) {
     Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler {
       def uncaughtException(t: Thread, e: Throwable) {
+        try {
+          Log.flush()
+        }
         writeCrashToFile(file, e)
         //let the program crash anyway
         System.err.print(formatStackTrace(e))
@@ -139,8 +147,11 @@ class Log(dir:String, logLevel:LogLevel) {
     formatString format toFormat
   }
 
-  def log(level:LogLevel, string: String, stackOffset: Int = 11) {
+  def flush() {
+    file foreach {_.flush()}
+  }
 
+  def log(level:LogLevel, string: String, stackOffset: Int = 11) {
     try {
       if (logLevel < level) {
 

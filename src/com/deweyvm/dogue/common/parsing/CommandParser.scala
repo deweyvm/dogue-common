@@ -49,11 +49,12 @@ class CommandParser extends RegexParsers {
 
 
   def parseOp = opChoices<~"""(?!\w)""".r
-  def opChoices = sayOp | pingOp | pongOp | greetOp
+  def opChoices = sayOp | pingOp | pongOp | greetOp | quitOp
   def sayOp = """say""".r ^^ { _ => DogueOp.Say }
   def pingOp = """ping""".r ^^ { _ => DogueOp.Ping }
   def pongOp = """pong""".r ^^ { _=> DogueOp.Pong }
   def greetOp = """greet""".r ^^ { _ => DogueOp.Greet }
+  def quitOp = """quit""".r ^^ { _ => DogueOp.Quit }
   def parseArg = """[^\s\x{0}]+""".r
   def parseWord = parseArg//"""\w+""".r
   //def space = """[ \t\n\r\v]+""".r

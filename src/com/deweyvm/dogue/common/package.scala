@@ -2,7 +2,7 @@ package com.deweyvm.dogue
 
 import java.net.Socket
 import scala.language.implicitConversions
-import com.deweyvm.dogue.common.data.{EnrichedNumber, EnrichedFunction2, EnrichedString, EnrichedOption}
+import com.deweyvm.dogue.common.data._
 import com.deweyvm.dogue.common.io.{EnrichedInputStream, EnrichedOutputStream, EnrichedSocket}
 import java.io.{OutputStream, InputStream}
 import scala.language.experimental.macros
@@ -17,6 +17,8 @@ package object common {
       new EnrichedOutputStream(out)
     implicit def inputStream2EnrichedInputStream(in:InputStream):EnrichedInputStream =
       new EnrichedInputStream(in)
+    implicit def indexedSeq2EnrichedIndexedSeq[T](seq:IndexedSeq[T]):EnrichedIndexedSeq[T] =
+      new EnrichedIndexedSeq[T](seq)
   }
 
   object Functions {

@@ -54,14 +54,14 @@ class CommandParser extends RegexParsers {
 
   def parseOp = opChoices<~"""(?!\w)""".r
   def opChoices = sayOp | pingOp | pongOp | greetOp | quitOp
-  def sayOp   = """say""".r   ^^ { _ => DogueOp.Say }
-  def pingOp  = """ping""".r  ^^ { _ => DogueOp.Ping }
-  def pongOp  = """pong""".r  ^^ { _ => DogueOp.Pong }
-  def greetOp = """greet""".r ^^ { _ => DogueOp.Greet }
-  def quitOp  = """quit""".r  ^^ { _ => DogueOp.Quit }
+  def sayOp   = "say".r   ^^ { _ => DogueOp.Say }
+  def pingOp  = "ping".r  ^^ { _ => DogueOp.Ping }
+  def pongOp  = "pong".r  ^^ { _ => DogueOp.Pong }
+  def greetOp = "greet".r ^^ { _ => DogueOp.Greet }
+  def quitOp  = "quit".r  ^^ { _ => DogueOp.Quit }
   def parseArg = """[^\s\x{0}"]+""".r
   def parseWord = parseString | parseArg //"""\w+""".r
-  def parseString = """"""".r~>"""[^"]*""".r<~""""""".r
+  def parseString = "\"".r~>"""[^"]*""".r<~"\"".r
   def parseArgs = rep1(parseWord)
   def parseCommand: Parser[Command] = parseWord~parseWord~parseWord~parseArgs.? ^^ {  case rawOp~src~dest~args =>
       Command(getOp(rawOp), src, dest, args map {_.toVector} getOrElse Vector())

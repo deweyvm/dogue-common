@@ -1,12 +1,11 @@
 package com.deweyvm.dogue.common.testing
 
-import com.deweyvm.dogue.common.protocol.Command
 import com.deweyvm.dogue.common.data.{LockedQueue, EnrichedString, Array2d}
-import com.deweyvm.dogue.common.logging.Log
+import com.deweyvm.dogue.common.parsing.CommandParser
 
 object TestManager {
   private val tests = Vector[(() => Unit, String)](
-    (Command.test, "Command"),
+    (CommandParser.test, "CommandParser"),
     (Array2d.test, "Array2d"),
     (EnrichedString.test, "EnrichedString"),
     (LockedQueue.test, "LockedQueue")

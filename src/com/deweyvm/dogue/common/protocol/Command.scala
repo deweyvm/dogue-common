@@ -13,6 +13,7 @@ object DogueOp {
   case object Pong extends DogueOp
   case object Greet extends DogueOp
   case object Quit extends DogueOp
+
 }
 
 

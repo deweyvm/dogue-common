@@ -57,15 +57,14 @@ class CommandParser extends RegexParsers {
   def quitOp = """quit""".r ^^ { _ => DogueOp.Quit }
   def parseArg = """[^\s\x{0}]+""".r
   def parseWord = parseArg//"""\w+""".r
-  //def space = """[ \t\n\r\v]+""".r
-  def parseArgs = rep(parseArg)
-  def parseCommand: Parser[Command] = parseWord~parseWord~parseWord~parseArgs ^^ {  case rawOp~src~dest~args =>
+  def parseArgs = rep1(parseArg)
+  def parseCommand: Parser[Command] = parseWord~parseWord~parseWord~(parseArgs ?)^^ {  case rawOp~src~dest~args =>
 
 //      parseToOpt(parse(parseOp, rawOp)) map { op =>
 //        Command(op, src, dest, args.toVector)
 //      } getOrElse {throw new ParseError("Unknown opcode: " + rawOp + " in " + "%s %s %s %s" format (rawOp, src, dest, args.mkString(" ")))}
 
-      Command(getOp(rawOp), src, dest, args.toVector)
+      Command(getOp(rawOp), src, dest, args map {_.toVector} getOrElse Vector())
 
   }
 

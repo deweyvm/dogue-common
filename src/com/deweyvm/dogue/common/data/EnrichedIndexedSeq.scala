@@ -1,6 +1,7 @@
 package com.deweyvm.dogue.common.data
 
 import com.deweyvm.dogue.common.Implicits._
+import scala.util.Random
 
 class EnrichedIndexedSeq[T](self:IndexedSeq[T]) {
   def tryGet(i:Int):Option[T] =
@@ -9,4 +10,11 @@ class EnrichedIndexedSeq[T](self:IndexedSeq[T]) {
     } else {
       self(i).some
     }
+
+
+  def getRandom:T = self(Random.nextInt(self.length))
+  def pickN(n:Int) = {
+    Random.shuffle(self).take(n)
+  }
+
 }

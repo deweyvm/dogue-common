@@ -84,14 +84,18 @@ object Log {
         }
         writeCrashToFile(file, e)
         //let the program crash anyway
-        System.err.print(formatStackTrace(e))
       }
     })
   }
 
   private def writeCrashToFile(file:FileOutputStream, e:Throwable) {
     try {
-      file.write(Encoding.toBytes(Log.formatStackTrace(e)))
+      var exc = e
+      while (exc != null) {
+        file.write(Encoding.toBytes(Log.formatStackTrace(exc)))
+        System.err.print(formatStackTrace(exc))
+        exc = exc.getCause
+      }
       file.close()
     } catch {
       case t: Throwable =>

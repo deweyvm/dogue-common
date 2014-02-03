@@ -7,11 +7,13 @@ import com.deweyvm.dogue.common.logging.Log
 trait DogueOp {
   override def toString = getClass.getSimpleName.toLowerCase.replace("$","")
 }
-object DogueOp {
+object DogueOps {
   case object Say extends DogueOp
   case object Ping extends DogueOp
   case object Pong extends DogueOp
   case object Greet extends DogueOp
+  case object Nick extends DogueOp
+  case object Reassign extends DogueOp
   case object Quit extends DogueOp
 
 }

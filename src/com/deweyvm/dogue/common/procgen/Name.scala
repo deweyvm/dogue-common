@@ -2,6 +2,10 @@ package com.deweyvm.dogue.common.procgen
 
 import com.deweyvm.dogue.common.Implicits._
 
+object Name {
+  val unknown = "&unknown&"
+}
+
 class Name {
   val prefixes = Vector("shibe", "doge", "so", "very", "such", "wow", "much")
   val suffixes = Vector("smell", "run", "tumble", "roll", "belch")

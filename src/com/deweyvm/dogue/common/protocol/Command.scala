@@ -25,12 +25,19 @@ object DogueOps {
   case object Reassign extends DogueOp
   case object Identify extends DogueOp
   case object Close extends DogueOp
+  case object LocalMessage extends DogueOp {
+    override def toString = "local"
+  }
 
 }
 
 
 trait DogueMessage {
   def toOption:Option[Command]
+}
+
+case class LocalCommand(op:DogueOp, args:Vector[String]) {
+  def toCommand(src:String, dest:String) = Command(op, src, dest, args)
 }
 
 case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) extends DogueMessage {
@@ -40,7 +47,7 @@ case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) 
       front
     } else {
       "%s %s" format (front, args map { a =>
-        val unquoted = a.replace("\"", "'")
+        val unquoted = a//.replace("\"", "'")
         if (unquoted.contains(' ')) {
           "\"%s\"" format unquoted
         } else {

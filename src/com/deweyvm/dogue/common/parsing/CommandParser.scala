@@ -21,8 +21,8 @@ object CommandParser {
       ("says 6bdaeba28f26b3e3 6bdaeba28f26b3e3 ?", None),
       ("say 5e01405ec801cfa4 5e01405ec801cfa4 HUH?", 1.some),
       ("greet flare &unknown& identify", 1.some),
-      ("say a b \"this is a test of parsing string literals\"", 1.some)
-
+      ("say a b \"this is a test of parsing string literals\"", 1.some),
+      ("local name &unknown& \"Attempting to establish a connection to dogue.in\"", 1.some)
     )
 
 
@@ -53,7 +53,16 @@ class CommandParser extends RegexParsers {
   override type Elem = Char
 
   def parseOp = opChoices<~"""(?!\w)""".r
-  def opChoices  = sayOp | pingOp | pongOp | greetOp | closeOp | nickOp | reassignOp | identifyOp | assignOp
+  def opChoices = sayOp      |
+                  pingOp     |
+                  pongOp     |
+                  greetOp    |
+                  closeOp    |
+                  nickOp     |
+                  reassignOp |
+                  identifyOp |
+                  assignOp   |
+                  localOp
   def sayOp      = "say".r      ^^ { _ => DogueOps.Say }
   def pingOp     = "ping".r     ^^ { _ => DogueOps.Ping }
   def pongOp     = "pong".r     ^^ { _ => DogueOps.Pong }
@@ -63,6 +72,7 @@ class CommandParser extends RegexParsers {
   def reassignOp = "reassign".r ^^ { _ => DogueOps.Reassign }
   def identifyOp = "identify".r ^^ { _ => DogueOps.Identify }
   def assignOp   = "assign".r   ^^ { _ => DogueOps.Assign }
+  def localOp    = "local".r   ^^ { _ => DogueOps.LocalMessage }
   def parseArg = """[^\s\x{0}"]+""".r
   def parseWord = parseString | parseArg //"""\w+""".r
   def parseString = "\"".r~>"""[^"]*""".r<~"\"".r
@@ -72,13 +82,19 @@ class CommandParser extends RegexParsers {
 
   }
 
+  def parseLocalCommand:Parser[LocalCommand] = parseWord~parseArgs.? ^^ { case rawOp~args =>
+    LocalCommand(getOp(rawOp), args map {_.toVector} getOrElse Vector())
+
+  }
+
+  def getLocalCommand(input:String):LocalCommand = {
+    val parseResult = parse(parseLocalCommand, input)
+    parseResult.getOrElse(throw new ParseError(parseResult.toString))
+  }
+
   def getCommand(input:String):DogueMessage = {
     val parseResult = parse(parseCommand, input)
-    if (parseResult.successful) {
-      parseResult.get
-    } else {
-      Invalid(input, parseResult.toString)
-    }
+    parseResult.getOrElse(Invalid(input, parseResult.toString))
   }
 
   def getOp(input:String):DogueOp = {

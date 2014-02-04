@@ -53,14 +53,16 @@ class CommandParser extends RegexParsers {
   override type Elem = Char
 
   def parseOp = opChoices<~"""(?!\w)""".r
-  def opChoices  = sayOp | pingOp | pongOp | greetOp | quitOp | nickOp | reassignOp
+  def opChoices  = sayOp | pingOp | pongOp | greetOp | closeOp | nickOp | reassignOp | identifyOp | assignOp
   def sayOp      = "say".r      ^^ { _ => DogueOps.Say }
   def pingOp     = "ping".r     ^^ { _ => DogueOps.Ping }
   def pongOp     = "pong".r     ^^ { _ => DogueOps.Pong }
   def greetOp    = "greet".r    ^^ { _ => DogueOps.Greet }
-  def quitOp     = "quit".r     ^^ { _ => DogueOps.Quit }
+  def closeOp    = "close".r    ^^ { _ => DogueOps.Close }
   def nickOp     = "nick".r     ^^ { _ => DogueOps.Nick }
   def reassignOp = "reassign".r ^^ { _ => DogueOps.Reassign }
+  def identifyOp = "identify".r ^^ { _ => DogueOps.Identify }
+  def assignOp   = "assign".r   ^^ { _ => DogueOps.Assign }
   def parseArg = """[^\s\x{0}"]+""".r
   def parseWord = parseString | parseArg //"""\w+""".r
   def parseString = "\"".r~>"""[^"]*""".r<~"\"".r
@@ -86,6 +88,5 @@ class CommandParser extends RegexParsers {
     } else {
       throw new ParseError(parseResult.toString)
     }
-
   }
 }

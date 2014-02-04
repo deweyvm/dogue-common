@@ -23,7 +23,14 @@ abstract class Task {
   }
 
   def doWork():Unit
-  def cleanup():Unit
+  def cleanup() {
+
+  }
+
+  def exception(t:Throwable) {
+
+  }
+
   def isRunning = running
 
   def logException(t:Throwable) {
@@ -37,7 +44,9 @@ abstract class Task {
         doWork()
       }
     } catch {
-      case t:Throwable => logException(t)
+      case t:Throwable =>
+        logException(t)
+        exception(t)
     } finally {
       cleanup()
     }

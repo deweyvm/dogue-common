@@ -22,6 +22,8 @@
 package com.deweyvm.dogue.common.data
 
 import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.logging.Log
+import java.util.FormatFlagsConversionMismatchException
 
 object EnrichedString {
   def test() {
@@ -44,7 +46,7 @@ object EnrichedString {
   }
 }
 
-class EnrichedString(rep:String) {
+class EnrichedString(self:String) {
   /**
    * Like the java string split, but a split at the end of the string leaves an additional
    * empty string in the output. See test methods for an example.
@@ -52,18 +54,18 @@ class EnrichedString(rep:String) {
    * @return the strings existing around occurrences of rep in order
    */
   def esplit(sep:Char):Vector[String] = {
-    val (lines, last) = rep.foldLeft(Vector[String](), "") { case ((lines,  l), c) =>
+    val (lines, last) = self.foldLeft(Vector[String](), "") { case ((acc,  l), c) =>
       if (c == sep) {
-        (lines ++ Vector(l), "")
+        (acc ++ Vector(l), "")
       } else {
-        (lines, l + c)
+        (acc, l + c)
       }
     }
     lines ++ Vector(last)
   }
 
   def toLines(width:Int):Vector[String] =  {
-    val (last, lines) = rep.foldLeft(("", Vector[String]())){
+    val (last, lines) = self.foldLeft(("", Vector[String]())){
       case ((currentLine, lines), c) =>
         val added = currentLine + c
         if (added.length == width - 1) {
@@ -77,5 +79,16 @@ class EnrichedString(rep:String) {
 
   }
 
+
+  def indent(width:Int):String = {
+    try {
+      val space = " " * width
+      space + self.esplit('\n').mkString("\n" + space)
+    } catch {
+      case e:FormatFlagsConversionMismatchException =>
+        Log.info(Log.formatStackTrace(e))
+        self
+    }
+  }
 
 }

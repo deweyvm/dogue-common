@@ -21,9 +21,9 @@ class LogLevel(val marker:String, val loudness:Int) {
 object Log {
   private val lock = new Lock
   def formatStackTrace(ex:Throwable):String = {
-    ("Failure:\nException in thread " + Thread.currentThread.getName + "\n"
+    ("Failure:\nException in thread " + Thread.currentThread.getName + ": "
     + ex.toString + '\n'
-    + ex.getStackTraceString)
+    + ex.getStackTraceString.indent(8))
   }
 
   case object All extends LogLevel("ALL ", Int.MaxValue)
@@ -49,7 +49,7 @@ object Log {
     checkLog()
     lock.foreach[Unit](_ =>
       log foreach f
-    )()
+    )(())
   }
 
   def all(s:String) {
@@ -81,8 +81,10 @@ object Log {
       def uncaughtException(t: Thread, e: Throwable) {
         try {
           Log.flush()
+          writeCrashToFile(file, e)
+        } catch {
+          case t:Throwable => ()
         }
-        writeCrashToFile(file, e)
         //let the program crash anyway
       }
     })
@@ -92,8 +94,9 @@ object Log {
     try {
       var exc = e
       while (exc != null) {
-        file.write(Encoding.toBytes(Log.formatStackTrace(exc)))
-        System.err.print(formatStackTrace(exc))
+        val formatted = formatStackTrace(exc)
+        file.write(Encoding.toBytes(formatted))
+        System.err.print(formatted)
         exc = exc.getCause
       }
       file.close()

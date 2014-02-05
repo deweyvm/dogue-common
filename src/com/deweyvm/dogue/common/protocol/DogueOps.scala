@@ -6,6 +6,7 @@ trait DogueOp {
 
 
 object DogueOps {
+  def getAll = List(Say, Ping, Pong, Greet, Nick, Assign, Reassign, Identify, Close, LocalMessage)
   case object Say extends DogueOp
   case object Ping extends DogueOp
   case object Pong extends DogueOp

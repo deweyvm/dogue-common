@@ -14,11 +14,10 @@ case class Command(op:DogueOp, source:String, dest:String, args:Vector[String]) 
       front
     } else {
       "%s %s" format (front, args map { a =>
-        val unquoted = a//.replace("\"", "'")
-        if (unquoted.contains(' ')) {
-          "\"%s\"" format unquoted
+        if (a.contains(' ')) {
+          "\"%s\"" format a
         } else {
-          unquoted
+          a
         }
       } mkString " ")
     }

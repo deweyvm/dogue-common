@@ -47,7 +47,7 @@ object Array2d {
       fail
 
     }
-    Test.runScalaCheck(prop)
+    Test.runScalaCheck(prop, 1)
   }
 }
 

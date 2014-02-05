@@ -5,11 +5,8 @@ import scala.util.parsing.combinator.RegexParsers
 import com.deweyvm.dogue.common.protocol._
 import com.deweyvm.dogue.common.protocol.Invalid
 import org.scalacheck.{Prop, Gen, Arbitrary}
-import com.deweyvm.dogue.common.data.Encoding
-import com.deweyvm.dogue.common.logging.Log
 import scala.util.Random
 import org.scalacheck.Test.Parameters.Default
-import org.scalacheck.Test.TestCallback
 import org.scalacheck.Test.Result
 import org.scalacheck.util.ConsoleReporter
 
@@ -25,11 +22,46 @@ object CommandParser {
 
   def validChars = goodAscii
   def nonQuote = resize(10, Gen.nonEmptyListOf(validChars).map(_.mkString))
-  def quote = nonQuote.map({ (x: String) =>
-    val randIndex = x.length
-    x.toVector.patch(Random.nextInt(randIndex), Vector(' '), 0).mkString
-  })
+  def randomInsert(c:Char)(s:String) = {
+    val randIndex = s.length
+    s.toVector.patch(Random.nextInt(randIndex), Vector(c), 0).mkString
+  }
+  def quote = nonQuote map randomInsert(' ')
+
+  val badQuote = nonQuote map randomInsert('"')
+
+
+
   def arg = quote//oneOf(nonQuote, quote)
+
+  def format(op:DogueOp, src:String, dst:String, args:Vector[String]) = {
+    val first = "%s %s %s" format (op.toString, src, dst)
+    val mappedArg = args.map(x =>
+      if (x.contains(' ')) {
+        "\"" + x + "\""
+      } else {
+        x
+      }
+    )
+    val rest =
+      if (mappedArg.length > 0) {
+        " " + mappedArg.mkString(" ")
+      } else {
+        ""
+      }
+    first + rest
+  }
+
+  implicit def misquotedCommand:Arbitrary[String] = {
+    Arbitrary {
+      for {
+        a <- badQuote
+      } yield {
+        a
+      }
+    }
+  }
+
   implicit def goodCommand:Arbitrary[(Command, String)] = {
     Arbitrary {
       for {
@@ -38,21 +70,7 @@ object CommandParser {
         dst <- nonQuote
         args <- listOf(arg)
       } yield {
-        val first = "%s %s %s" format (op.toString, src, dst)
-        val mappedArg = args.map(x =>
-          if (x.contains(' ')) {
-            "\"" + x + "\""
-          } else {
-            x
-          }
-        )
-        val rest =
-          if (mappedArg.length > 0) {
-            " " + mappedArg.mkString(" ")
-          } else {
-            ""
-          }
-        val result = (Command(op, src, dst, args.toVector), first + rest)
+        val result = (Command(op, src, dst, args.toVector), format(op, src, dst, args.toVector))
         assert(result._1.toString == result._2)
         result
       }
@@ -110,6 +128,18 @@ object CommandParser {
       parseAssert(r, _.toString, _.toString)
     }).label("Parsed command string match")
 
+    val badQuote = Prop.forAll{r:String =>
+      val parser = new CommandParser()
+      val result = parser.parse(parser.parseString, r)
+      if (result.successful) {
+        false
+      } else {
+        true
+      }
+
+    } label "Parse should fail for misquoted strings"
+
+
     (opMatch && sourceMatch && destMatch && argLengthMatch && commandMatch).check(new Default{}.
       withWorkers(100).
       withTestCallback(new ConsoleReporter(1) {
@@ -121,6 +151,7 @@ object CommandParser {
             }
           }
     }))
+    badQuote.check
     //Test.runScalaCheck(/*argLengthMatch &&*/ opMatch /*&& sourceMatch && destMatch && commandMatch*/)
 
   }

@@ -3,15 +3,24 @@ package com.deweyvm.dogue.common.testing
 import com.deweyvm.dogue.common.logging.Log
 import org.scalacheck.Prop
 import org.scalacheck.Gen.Parameters
+import org.scalacheck.Test.Parameters.Default
+import org.scalacheck.util.ConsoleReporter
+import org.scalacheck.Test.Result
 
 object Test {
-  def runScalaCheck(ps:Prop*) {
-    ps foreach { p =>
-      val result = p(Parameters.default)
-      if (!result.success) {
-        throw new RuntimeException(result.labels.headOption.getOrElse("Unknown") + " test failed")
+  def runScalaCheck(p:Prop, workers:Int) {
+    p.check(new Default{}.
+      withWorkers(workers).
+      withTestCallback(new ConsoleReporter(1) {
+      override def onTestResult(name: String, result: Result) {
+        if (!result.passed) {
+          super.onTestResult(name, result)
+          throw new RuntimeException("test failed")
+        } else {
+
+        }
       }
-    }
+    }))
   }
 }
 

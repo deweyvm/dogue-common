@@ -30,7 +30,8 @@ object LockedQueue {
       q.length == len
     }.label("Queue sum")
 
-    Test.runScalaCheck(p1, p2)
+    Test.runScalaCheck(p1, 1)
+    Test.runScalaCheck(p2, 1)
 
   }
 }

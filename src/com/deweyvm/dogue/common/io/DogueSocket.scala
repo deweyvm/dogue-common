@@ -3,7 +3,7 @@ package com.deweyvm.dogue.common.io
 import java.net.{ServerSocket, Socket}
 import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
-import com.deweyvm.dogue.common.protocol.{Invalid, Command, DogueMessage}
+import com.deweyvm.dogue.common.protocol.{DogueOps, Invalid, Command, DogueMessage}
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.parsing.CommandParser
 import com.deweyvm.dogue.common.data.LockedQueue
@@ -41,9 +41,11 @@ class DogueSocket(val serverName:String, socket:Socket) {
   val commandQueue = new LockedQueue[DogueMessage]
   val parser = new CommandParser
   def transmit(s:DogueMessage) {
-    Log.info("Transmit: \"%s\"" format s.toString)
+    getLogFunc(s)("Transmit: \"%s\"" format s.toString)
     writeLock.map(socket.transmit)(s.toString)
   }
+
+  def ip = socket.getRemoteSocketAddress.toString
 
   private def receive():NetworkData[String] = {
     readLock.get(socket.receive)
@@ -78,7 +80,7 @@ class DogueSocket(val serverName:String, socket:Socket) {
     }
 
     commands foreach {cmd =>
-      Log.info("Received: \"%s\"" format cmd.toString)
+      getLogFunc(cmd)("Received: \"%s\"" format cmd.toString)
     }
     commands.toVector
   }
@@ -91,6 +93,16 @@ class DogueSocket(val serverName:String, socket:Socket) {
     try {
       socket.close()
     }
+  }
+
+
+
+  def getLogFunc(s:DogueMessage):String => Unit = s match {
+    case Command(DogueOps.Ping, _, _, _) =>
+      Log.all
+    case Command(DogueOps.Pong, _, _, _) =>
+      Log.all
+    case _ => Log.info
   }
 
 }

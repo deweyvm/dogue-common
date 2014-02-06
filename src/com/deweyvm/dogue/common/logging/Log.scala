@@ -101,7 +101,7 @@ object Log {
       }
       file.close()
     } catch {
-      case t: Throwable =>
+      case t: Exception =>
         System.err.print(formatStackTrace(t))
 
     }
@@ -170,7 +170,7 @@ class Log(dir:String, logLevel:LogLevel) {
       println(s)
       file foreach {_.write((s + "\n").getBytes("UTF-8"))}
     } catch {
-      case t:Throwable =>
+      case t:Exception =>
         println(Log.formatStackTrace(t))
     }
   }

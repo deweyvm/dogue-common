@@ -27,13 +27,13 @@ abstract class Task {
 
   }
 
-  def exception(t:Throwable) {
+  def exception(t:Exception) {
 
   }
 
   def isRunning = running
 
-  def logException(t:Throwable) {
+  def logException(t:Exception) {
     Log.warn(Log.formatStackTrace(t))
   }
 
@@ -44,7 +44,7 @@ abstract class Task {
         doWork()
       }
     } catch {
-      case t:Throwable =>
+      case t:Exception =>
         logException(t)
         exception(t)
     } finally {

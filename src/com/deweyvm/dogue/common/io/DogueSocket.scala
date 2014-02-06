@@ -78,6 +78,10 @@ class DogueSocket(val serverName:String, socket:Socket) {
     }
 
     commands foreach {cmd =>
+      cmd.toString foreach { c =>
+        println(c.toInt)
+
+      }
       Log.info("Received: \"%s\"" format cmd.toString)
     }
     commands.toVector

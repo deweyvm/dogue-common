@@ -28,4 +28,6 @@ object DogueOps {
     override def toString = "local"
   }
 
+  case object Connect extends DogueOp
+
 }

@@ -166,11 +166,12 @@ class CommandParser extends RegexParsers {
                   pongOp     |
                   greetOp    |
                   closeOp    |
-                  registerOp     |
+                  registerOp |
                   reassignOp |
                   identifyOp |
                   assignOp   |
-                  localOp
+                  localOp    |
+                  connectOp
   def sayOp      = "say".r      ^^ { _ => DogueOps.Say }
   def pingOp     = "ping".r     ^^ { _ => DogueOps.Ping }
   def pongOp     = "pong".r     ^^ { _ => DogueOps.Pong }
@@ -181,6 +182,7 @@ class CommandParser extends RegexParsers {
   def identifyOp = "identify".r ^^ { _ => DogueOps.Identify }
   def assignOp   = "assign".r   ^^ { _ => DogueOps.Assign }
   def localOp    = "local".r    ^^ { _ => DogueOps.LocalMessage }
+  def connectOp  = "connect".r  ^^ { _ => DogueOps.Connect }
   def parseArg = """[^\s\x{0}"]+""".r
   def parseWord = parseString | parseArg //"""\w+""".r
   def parseString = """"[^"]*"""".r ^^ { x => x.substring(1, x.length - 1)}

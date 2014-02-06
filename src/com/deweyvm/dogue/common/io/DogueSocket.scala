@@ -63,7 +63,6 @@ class DogueSocket(val serverName:String, socket:Socket) {
         buffer += nextLine
         nextLine = ""
       }
-
       nextLine = last
     }
     commandQueue.enqueueAll((buffer map parser.getCommand).toVector)

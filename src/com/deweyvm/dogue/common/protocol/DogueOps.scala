@@ -6,12 +6,12 @@ trait DogueOp {
 
 
 object DogueOps {
-  def getAll = List(Say, Ping, Pong, Greet, Nick, Assign, Reassign, Identify, Close, LocalMessage)
+  def getAll = List(Say, Ping, Pong, Greet, Register, Assign, Reassign, Identify, Close, LocalMessage)
   case object Say extends DogueOp
   case object Ping extends DogueOp
   case object Pong extends DogueOp
   case object Greet extends DogueOp
-  case object Nick extends DogueOp
+  case object Register extends DogueOp
 
   /**
    * Assign a username and password to a user who has requested one.

@@ -166,7 +166,7 @@ class CommandParser extends RegexParsers {
                   pongOp     |
                   greetOp    |
                   closeOp    |
-                  nickOp     |
+                  registerOp     |
                   reassignOp |
                   identifyOp |
                   assignOp   |
@@ -176,7 +176,7 @@ class CommandParser extends RegexParsers {
   def pongOp     = "pong".r     ^^ { _ => DogueOps.Pong }
   def greetOp    = "greet".r    ^^ { _ => DogueOps.Greet }
   def closeOp    = "close".r    ^^ { _ => DogueOps.Close }
-  def nickOp     = "nick".r     ^^ { _ => DogueOps.Nick }
+  def registerOp = "register".r ^^ { _ => DogueOps.Register }
   def reassignOp = "reassign".r ^^ { _ => DogueOps.Reassign }
   def identifyOp = "identify".r ^^ { _ => DogueOps.Identify }
   def assignOp   = "assign".r   ^^ { _ => DogueOps.Assign }

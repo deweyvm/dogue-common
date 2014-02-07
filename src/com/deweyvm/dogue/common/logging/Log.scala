@@ -1,11 +1,9 @@
 package com.deweyvm.dogue.common.logging
 
-import java.io.{PrintStream, FileOutputStream, File}
+import java.io.{FileOutputStream, File}
 import com.deweyvm.dogue.common.data.Encoding
-import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.gleany.data.Time
-import com.deweyvm.gleany.graphics.Color
 
 
 class LogLevel(val marker:String, val loudness:Int) {
@@ -19,7 +17,6 @@ class LogLevel(val marker:String, val loudness:Int) {
 
 
 object Log {
-  private val lock = new Lock
   def formatStackTrace(ex:Throwable):String = {
     ("Failure:\nException in thread " + Thread.currentThread.getName + ": "
     + ex.toString + '\n'
@@ -47,9 +44,9 @@ object Log {
 
   private def useLog[A](f:Log=>A) {
     checkLog()
-    lock.foreach[Unit](_ =>
+    synchronized {
       log foreach f
-    )(())
+    }
   }
 
   def all(s:String) {
@@ -158,20 +155,22 @@ class Log(dir:String, logLevel:LogLevel) {
     file foreach {_.flush()}
   }
 
-  def log(level:LogLevel, string: String, stackOffset: Int = 11) {
+  def log(level:LogLevel, string:String, stackOffset:Int = 7) {
     try {
       if (logLevel < level) {
 
         return
       }
       val callStack = Thread.currentThread().getStackTrace
-      val className = callStack(stackOffset).getClassName.split("""[.]""").last
+      val index = scala.math.min(callStack.length - 1, stackOffset)
+      val className = callStack(index).getClassName.split("""[.]""").last
       val s = "(%s) [%s] %s: %s".format(Time.getString, level.marker, transformName(className), string).replace("\0", "\\0")
       println(s)
       file foreach {_.write((s + "\n").getBytes("UTF-8"))}
     } catch {
       case t:Exception =>
         println(Log.formatStackTrace(t))
+        throw t
     }
   }
 }

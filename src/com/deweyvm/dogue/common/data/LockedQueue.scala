@@ -1,9 +1,10 @@
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.dogue.common.threading.Lock
 import org.scalacheck.Prop.forAll
 import org.scalacheck.{Gen, Arbitrary}
 import com.deweyvm.dogue.common.testing.Test
+import com.deweyvm.dogue.common.Implicits
+import Implicits._
 
 object LockedQueue {
   implicit def arbQ[T](implicit a:Arbitrary[T]):Arbitrary[LockedQueue[T]] =
@@ -30,40 +31,68 @@ object LockedQueue {
       q.length == len
     }.label("Queue sum")
 
+    val p3 = forAll { q:LockedQueue[String] =>
+      val size = q.length
+      val threads = (0 until 100) map { _ =>
+        new Thread {
+          override def run(): Unit = {
+            q.dequeueIfNotEmpty match {
+              case Some(s) => q.enqueue(s)
+              case None => ()
+            }
+
+          }
+        }
+      }
+      threads foreach {_.start()}
+      threads foreach {_.join()}
+      val result = size == q.length
+      if (!result) {
+        println(q.length - size)
+      }
+      result
+
+    }.label("Queue threading test")
+
     Test.runScalaCheck(p1, 1)
     Test.runScalaCheck(p2, 1)
+    Test.runScalaCheck(p3, 1)
 
   }
 }
 
 class LockedQueue[A] {
-  private val lock = new Lock
   private val queue = collection.mutable.Queue[A]()
 
-  def length = lockedDo(_.length)
+  def length = synchronized { queue.length }
 
   def enqueue(s:A) {
-    lockedDo(_.enqueue(s))
+    synchronized { queue.enqueue(s) }
   }
 
   def enqueueAll(as:Vector[A]) {
-    lockedDo(_.enqueue(as:_*))
+    synchronized { queue.enqueue(as:_*) }
   }
 
-  def dequeue():A = {
-    lockedDo(_.dequeue())
+  def dequeue():A = synchronized {
+    synchronized { queue.dequeue() }
   }
 
-  def isEmpty:Boolean = {
-    lockedDo(_.isEmpty)
+  def dequeueIfNotEmpty:Option[A] = synchronized {
+    if (!queue.isEmpty) {
+      queue.dequeue().some
+    } else {
+      None
+    }
+
   }
 
-  def dequeueAll():Vector[A] = {
-    lockedDo(_.dequeueAll(_ => true).toVector)
+  def isEmpty:Boolean = synchronized {
+    queue.isEmpty
   }
 
-  private def lockedDo[T](f:collection.mutable.Queue[A] => T):T = {
-    lock.map(f)(queue)
+  def dequeueAll():Vector[A] = synchronized {
+    queue.dequeueAll(_ => true).toVector
   }
 
 }

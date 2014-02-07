@@ -1,7 +1,6 @@
 package com.deweyvm.dogue.common.io
 
 import java.net.{ServerSocket, Socket}
-import com.deweyvm.dogue.common.threading.Lock
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.dogue.common.protocol.{DogueOps, Invalid, Command, DogueMessage}
 import scala.collection.mutable.ArrayBuffer
@@ -35,20 +34,21 @@ object DogueSocket {
 }
 
 class DogueSocket(val serverName:String, socket:Socket) {
-  val readLock = new Lock()
-  val writeLock = new Lock()
+
   var nextLine = ""
   val commandQueue = new LockedQueue[DogueMessage]
   val parser = new CommandParser
   def transmit(s:DogueMessage) {
     getLogFunc(s)("Transmit: \"%s\"" format s.toString)
-    writeLock.map(socket.transmit)(s.toString)
+    synchronized {
+      socket.transmit(s.toString)
+    }
   }
 
   def ip = socket.getRemoteSocketAddress.toString
 
-  private def receive():NetworkData[String] = {
-    readLock.get(socket.receive)
+  private def receive():NetworkData[String] = synchronized {
+    socket.receive()
   }
 
   //in the future might want to have this run more often than it is queried
@@ -84,8 +84,8 @@ class DogueSocket(val serverName:String, socket:Socket) {
     commands.toVector
   }
 
-  def setTimeout(millis:Int) {
-    readLock.map(socket.setSoTimeout)(millis)
+  def setTimeout(millis:Int):Unit = synchronized {
+    socket.setSoTimeout(millis)
   }
 
   def close() {

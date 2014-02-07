@@ -1,6 +1,8 @@
 package com.deweyvm.dogue.common.data
 
 import scala.collection.mutable.ArrayBuffer
+import com.deweyvm.dogue.common.Implicits
+import Implicits._
 
 //code page 437
 //uppercase special characters are suffixed with _u due to the possible error:
@@ -264,6 +266,8 @@ object Code {
   val `²`        = Code(253, '²', '\u00B2')
   val ■          = Code(254, '■', '\u25A0')
 
+  def random:Code = All.getRandom
+
   def codeToUnicode(code:Char):Char = {
     if (code < 1 || code > 253) {
       '?'
@@ -273,7 +277,7 @@ object Code {
   }
 
   def unicodeToCode(s:Char):Code = {
-    (All.find(_.unicode == s) getOrElse Code.?)
+    All.find(_.unicode == s) getOrElse Code.?
   }
 
 }

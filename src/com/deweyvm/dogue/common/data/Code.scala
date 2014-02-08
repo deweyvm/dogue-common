@@ -280,6 +280,9 @@ object Code {
     All.find(_.unicode == s) getOrElse Code.?
   }
 
+  def intToCode(i:Int):Code = {
+    All.find(_.index == i) getOrElse Code.?
+  }
 }
 
 case class Code(index:Int, char:Char='?', unicode:Char) {

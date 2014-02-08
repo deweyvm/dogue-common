@@ -1,9 +1,9 @@
 package com.deweyvm.dogue.common.data
 
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck.Prop.forAll
+import org.scalacheck.{Prop, Gen, Arbitrary}
 import scala.util.Random
 import com.deweyvm.dogue.common.testing.Test
+import scala.Some
 
 object Array2d {
   def tabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
@@ -36,7 +36,7 @@ object Array2d {
           }
         }
       }
-    val prop = forAll { a:Array2d[Int] =>
+    val prop = Prop.forAll { a:Array2d[Int] =>
       var fail = true
       a.foreach( {case (i, j, t) =>
         val x = a.unsafeGet(i, j)
@@ -51,11 +51,28 @@ object Array2d {
   }
 }
 
-class Array2d[+T](elements:Vector[T], val cols:Int, val rows:Int) {
+class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) {
   import Array2d._
   def foreach(f:(Int,Int,T) => Unit) {
     elements.zipWithIndex foreach { case (t, k) =>
       val (i, j) = indexToCoords(k, cols)
+      f(i, j, t)
+    }
+  }
+
+  /**
+   * Cut "this" down to the given size from the upper left corner.
+   * If "this" is too small, fill in the extra slots with a default value.
+   */
+  def cut[K](c:Int, r:Int, f:T => K, default: => K):Array2d[K] = {
+    Array2d.tabulate(c, r) { case (i, j) =>
+      get(i, j).fold(default)(f)
+    }
+  }
+
+  def map[K](f:(Int, Int, T) => K):Array2d[K] = {
+    Array2d.tabulate(cols, rows) { case (i, j) =>
+      val t = unsafeGet(i, j)
       f(i, j, t)
     }
   }

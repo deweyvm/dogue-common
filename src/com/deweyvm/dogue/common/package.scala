@@ -20,6 +20,7 @@ package object common {
       new EnrichedInputStream(in)
     implicit def indexedSeq2EnrichedIndexedSeq[A](seq:IndexedSeq[A]):EnrichedIndexedSeq[A] =
       new EnrichedIndexedSeq[A](seq)
+    implicit def any2Unit[A](a:A) = new EnrichedUnit(a)
   }
 
   object Functions {

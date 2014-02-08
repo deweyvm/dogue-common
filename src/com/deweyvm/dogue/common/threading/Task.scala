@@ -52,8 +52,7 @@ abstract class Task {
     }
   }
 
-  final def start():Task = {
+  final def start() = {
     ThreadManager.spawn(this)
-    this
   }
 }

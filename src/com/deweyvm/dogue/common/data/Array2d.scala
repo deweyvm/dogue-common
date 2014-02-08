@@ -14,6 +14,14 @@ object Array2d {
     new Array2d(elts, cols, rows)
   }
 
+  def parTabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
+    val elts = (0 until cols*rows).toVector.par.map { k =>
+      val (i, j) = indexToCoords(k, cols)
+      f(i, j)
+    }
+    new Array2d(elts.toVector, cols, rows)
+  }
+
   /**
    * the parameter t is evaluated once
    */
@@ -21,8 +29,8 @@ object Array2d {
     new Array2d(Vector.fill(cols*rows)(t), cols, rows)
   }
 
-  def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
-  def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
+  @inline def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
+  @inline def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
 
   def test() {
     implicit def arbA2d:Arbitrary[Array2d[Int]] =
@@ -59,6 +67,11 @@ class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) {
       f(i, j, t)
     }
   }
+
+  def groupBy[K](f:T=>K) = elements.groupBy(f)
+
+  def max[K >: T](implicit cmp: Ordering[K]):T = elements.max(cmp)
+  def min[K >: T](implicit cmp: Ordering[K]):T = elements.min(cmp)
 
   /**
    * Cut "this" down to the given size from the upper left corner.

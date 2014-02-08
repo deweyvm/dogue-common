@@ -4,36 +4,47 @@ import scala.collection.immutable.IndexedSeq
 import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.data.Array2d
+import scala.math._
 
 object PerlinNoise {
   def default = {
-    new PerlinNoise(1/128.0, 8, 512)
+    new PerlinNoise(1/128.0, 2, 1024)
     //new PerlinNoise(1/32.0, 4, 128)
     //new PerlinNoise(1/32.0, 5, 256)
+    //new PerlinNoise(1/128.0, 8, 1024)
   }
 }
 
 class PerlinNoise(freq:Double, octaves:Int, val size:Int) {
   private val whatDoesThisVariableMean = size
+  private val random = new Random(0)
   private val perm: IndexedSeq[Int] = {
-    val t: IndexedSeq[Int] = new Random().shuffle(0 until whatDoesThisVariableMean : IndexedSeq[Int])
-    t ++ t
+    val t: IndexedSeq[Int] = random.shuffle(0 until whatDoesThisVariableMean : IndexedSeq[Int])
+    t
+  }
+
+
+  def getPerm(i:Int) = {
+    perm(i % perm.length)
   }
   private val pi = 3.1415926535897932384626433
-  private val dirs = (0 until whatDoesThisVariableMean) map { i =>
-    val x = scala.math.cos(i * 2 * pi/whatDoesThisVariableMean)
-    val y = scala.math.sin(i * 2 * pi/whatDoesThisVariableMean)
-    (x, y)
+  private val dirs = {
+    ((0 until whatDoesThisVariableMean) map { i =>
+      val x = scala.math.cos(i * 2 * pi/whatDoesThisVariableMean)
+      val y = scala.math.sin(i * 2 * pi/whatDoesThisVariableMean)
+      (x, y)
+    }).toVector
   }
+
+  def poly(v: Double) = 1 - 6*pow(v, 5) + 15*pow(v, 4) - 10*pow(v, 3)
 
   private def noise(x: Double, y: Double, per: Int): Double = {
     import scala.math._
     def surflet(gridX: Double, gridY: Double): Double = {
       val (distX, distY) = (abs(x - gridX), abs(y - gridY))
-      def poly(v: Double) = 1 - 6*pow(v, 5) + 15*pow(v, 4) - 10*pow(v, 3)
       val polyX = poly(distX)
       val polyY = poly(distY)
-      val hashed = perm(perm(gridX.toInt%per) + gridY.toInt%per)
+      val hashed = getPerm(getPerm(gridX.toInt%per) + gridY.toInt%per)
       val grad = (x-gridX)*dirs(hashed)._1 + (y-gridY)*dirs(hashed)._2
       polyX * polyY * grad
     }
@@ -46,14 +57,12 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int) {
 
   private def fBm(x: Double, y: Double, per: Int, octs: Int): Double = {
     import scala.math._
-    var v = 0.0
-    for (i <- 0 until octs) {
-      val p = pow(2, i).toInt
+    (0 until octs).foldRight(0.0) { case (i, acc) =>
+      val p =pow(2, i).toInt //2 << i ?
       val xArg: Double = x * p
       val yArg: Double = y * p
-      v += pow(0.5, i).toFloat * noise(xArg, yArg, per * p)
+      acc + pow(0.5, i).toFloat * noise(xArg, yArg, per * p)
     }
-    v
   }
 
 
@@ -64,25 +73,21 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int) {
     /*val freq = 1/32.0
     val size = 256
     val octs = 5*/
-    val buff = ArrayBuffer[Double]()
-    val result = Array2d.tabulate(size, size) { case (x, y) =>
-      val r = fBm(freq*x, freq*y, (size*freq).toInt, octaves)
-      buff += r
-      r
+
+    Array2d.parTabulate(size, size) { case (x, y) =>
+      fBm(freq*x, freq*y, (size*freq).toInt, octaves)
     }
-    val grouped = buff.groupBy(d => (d*10).toInt)
+  }
+
+  def printFrequencies(rendered:Array2d[Double]) {
+    val grouped = rendered.groupBy(d => (d*10).toInt)
     for (i <- -10 until 10) {
       if (grouped.contains(i)) {
         print(i)
         println("    " + grouped(i).length)
       }
     }
-    println("%f, %f" format (buff.max, buff.min))
-    result
-  }
-
-  def printFrequencies(rendered:Array[Array[Double]]) {
-
+    println("%f, %f" format (rendered.max, rendered.min))
   }
 
 

@@ -3,21 +3,22 @@ package com.deweyvm.dogue.common.procgen
 import scala.collection.immutable.IndexedSeq
 import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
-import com.deweyvm.dogue.common.data.Array2d
+import com.deweyvm.dogue.common.data.{Lazy2d, Indexed2d, Array2d}
 import scala.math._
 
 object PerlinNoise {
   def default = {
-    new PerlinNoise(1/128.0, 2, 1024)
+    new PerlinNoise(1/2048.0, 14, 4096, 0)
+    //new PerlinNoise(1/128.0, 4, 1024)
     //new PerlinNoise(1/32.0, 4, 128)
     //new PerlinNoise(1/32.0, 5, 256)
     //new PerlinNoise(1/128.0, 8, 1024)
   }
 }
 
-class PerlinNoise(freq:Double, octaves:Int, val size:Int) {
+class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Int) {
   private val whatDoesThisVariableMean = size
-  private val random = new Random(0)
+  private val random = new Random(seed)
   private val perm: IndexedSeq[Int] = {
     val t: IndexedSeq[Int] = random.shuffle(0 until whatDoesThisVariableMean : IndexedSeq[Int])
     t
@@ -67,7 +68,12 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int) {
 
 
 
-
+  def lazyRender:Indexed2d[Double] = {
+    def func(x:Int, y:Int) = {
+      fBm(freq*x, freq*y, (size*freq).toInt, octaves)
+    }
+    new Lazy2d(func, size, size)
+  }
 
   def render:Array2d[Double] = {
     /*val freq = 1/32.0

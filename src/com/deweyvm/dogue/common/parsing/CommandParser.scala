@@ -9,6 +9,7 @@ import scala.util.Random
 import org.scalacheck.Test.Parameters.Default
 import org.scalacheck.Test.Result
 import org.scalacheck.util.ConsoleReporter
+import com.deweyvm.dogue.common.testing.Test
 
 
 object CommandParser {
@@ -140,20 +141,8 @@ object CommandParser {
     } label "Parse should fail for misquoted strings"
 
 
-    (opMatch && sourceMatch && destMatch && argLengthMatch && commandMatch).check(new Default{}.
-      withWorkers(100).
-      withTestCallback(new ConsoleReporter(1) {
-          override def onTestResult(name: String, result: Result) {
-            if (!result.passed) {
-              super.onTestResult(name, result)
-            } else {
-
-            }
-          }
-    }))
-    badQuote.check
-    //Test.runScalaCheck(/*argLengthMatch &&*/ opMatch /*&& sourceMatch && destMatch && commandMatch*/)
-
+    Test.runScalaCheck(opMatch && sourceMatch && destMatch && argLengthMatch && commandMatch, 100)
+    Test.runScalaCheck(badQuote, 1)
   }
 }
 

@@ -59,8 +59,13 @@ object Array2d {
   }
 }
 
-class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) {
+
+
+class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) extends Indexed2d[T] {
   import Array2d._
+
+  def strictGetAll:Vector[T] = elements
+
   def foreach(f:(Int,Int,T) => Unit) {
     elements.zipWithIndex foreach { case (t, k) =>
       val (i, j) = indexToCoords(k, cols)

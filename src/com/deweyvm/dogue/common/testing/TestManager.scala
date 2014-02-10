@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.testing
 
-import com.deweyvm.dogue.common.data.{LockedQueue, EnrichedString, Array2d}
+import com.deweyvm.dogue.common.data.{Array2d, EnrichedString, LockedQueue}
 import com.deweyvm.dogue.common.parsing.CommandParser
 
 object TestManager {

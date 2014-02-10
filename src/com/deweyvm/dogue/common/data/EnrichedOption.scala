@@ -22,6 +22,6 @@
 package com.deweyvm.dogue.common.data
 
 class EnrichedOption[+T](self:T) {
-  def some:Option[T] = Some(self)
+  def some[K >: T]:Option[K] = Some(self)
   def none:Option[T] = None
 }

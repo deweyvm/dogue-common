@@ -6,9 +6,12 @@ import Implicits._
 import scala.collection.mutable
 
 
-class Lazy2d[T](getter:(Int, Int) => T, cols:Int, rows:Int) extends Indexed2d[T] {
+class Lazy2d[T](getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   private val buffer = mutable.Map[Int,T]()
   private val set = mutable.Map[Int,Boolean]().withDefaultValue(false)
+
+  override def cols = cols_
+  override def rows = rows_
 
   def strictGetAll:Vector[T] = ((0 until cols*rows) map { i:Int =>
     val (x, y) = Array2d.indexToCoords(i, cols)
@@ -29,7 +32,7 @@ class Lazy2d[T](getter:(Int, Int) => T, cols:Int, rows:Int) extends Indexed2d[T]
     }
   }
 
-  def map[K](f:(Int, Int, T) => K):Indexed2d[K] = {
+  def map[K](f:(Int, Int, T) => K):Lazy2d[K] = {
     def newGetter(i:Int, j:Int):K = {
         val t = unsafeGet(i, j)
         f(i, j, t)
@@ -49,17 +52,27 @@ class Lazy2d[T](getter:(Int, Int) => T, cols:Int, rows:Int) extends Indexed2d[T]
     }
   }
 
-  def cut[K](c:Int, r:Int, f:T => K, default: => K):Indexed2d[K] = {
+  def cut[K](c:Int, r:Int, f:T => K, default: => K):Lazy2d[K] = {
     def newGetter(i:Int, j:Int):K = {
       get(i, j).fold(default)(f)
     }
     new Lazy2d(newGetter, c, r)
   }
 
-  def slice(x:Int, y:Int, width:Int, height:Int):Indexed2d[Option[T]] = {
+  def slice(x:Int, y:Int, width:Int, height:Int):Lazy2d[Option[T]] = {
     def newGetter(i:Int, j:Int):Option[T] = {
       get(i + x, j + y)
     }
     new Lazy2d(newGetter, width, height)
+  }
+
+  def sample(div:Int):Lazy2d[T] = {
+    if (div <= 0) {
+      throw new IllegalArgumentException("div must be > 0")
+    }
+    def newGetter(i:Int, j:Int):T = {
+      unsafeGet(i*div, j*div)
+    }
+    new Lazy2d(newGetter, cols/div, rows/div)
   }
 }

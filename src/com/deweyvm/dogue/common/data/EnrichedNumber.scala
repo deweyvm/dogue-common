@@ -10,5 +10,8 @@ class EnrichedNumber[T](rep:T)(implicit n: Numeric[T]) {
       rep
     }
   }
+
+  def max(other:T) = n.max(rep, other)
+  def min(other:T) = n.min(rep, other)
 }
 

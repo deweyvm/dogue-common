@@ -61,8 +61,11 @@ object Array2d {
 
 
 
-class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) extends Indexed2d[T] {
+class Array2d[+T](val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   import Array2d._
+
+  def rows = rows_
+  def cols = cols_
 
   def strictGetAll:Vector[T] = elements
 
@@ -116,6 +119,16 @@ class Array2d[+T](val elements:Vector[T], val cols:Int, val rows:Int) extends In
   def slice(x:Int, y:Int, width:Int, height:Int):Array2d[Option[T]] = {
     Array2d.tabulate(width, height) { case (i, j) =>
       get(i + x, j + y)
+    }
+  }
+
+  def sample(div:Int):Array2d[T] = {
+    if (div <= 0) {
+      throw new IllegalArgumentException("div must be > 0")
+    }
+    val (newCols, newRows) = (cols/div, rows/div)
+    Array2d.tabulate(newCols, newRows) { case (i, j) =>
+      unsafeGet(i*div, j*div)
     }
   }
 }

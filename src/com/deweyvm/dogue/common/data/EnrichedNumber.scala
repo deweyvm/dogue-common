@@ -13,5 +13,9 @@ class EnrichedNumber[T](rep:T)(implicit n: Numeric[T]) {
 
   def max(other:T) = n.max(rep, other)
   def min(other:T) = n.min(rep, other)
+
+  def isEven:Boolean = n.toInt(rep) % 2 == 0
+  def isOdd:Boolean = n.toInt(rep) % 2 == 1
+
 }
 

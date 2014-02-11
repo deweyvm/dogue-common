@@ -4,6 +4,10 @@ import com.deweyvm.gleany.data.{Point2f, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
 
+object Voronoi {
+  def getEdges()
+}
+
 /**
  * credit to ivank
  */
@@ -18,8 +22,6 @@ class FortuneVoronoi {
   }
   private val queue:mutable.PriorityQueue[VEvent] = mutable.PriorityQueue[VEvent]()
 
-  //private var queue:Heap = new Heap(true)
-  private var i:Int = 0
   private var width:Int = 0
   private var height:Int = 0
 

@@ -13,6 +13,10 @@ class EnrichedIndexedSeq[T](self:IndexedSeq[T]) {
 
 
   def getRandom:T = self(Random.nextInt(self.length))
+
+  def getRandom(r:Random):T = self(r.nextInt(self.length))
+
+
   def pickN(n:Int) = {
     Random.shuffle(self).take(n)
   }

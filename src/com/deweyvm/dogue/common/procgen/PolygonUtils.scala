@@ -1,26 +1,13 @@
 package com.deweyvm.dogue.common.procgen
 
-import com.deweyvm.gleany.data.Point2i
+import com.deweyvm.gleany.data.{Point2d, Point2i}
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
+import com.deweyvm.dogue.common.procgen.voronoi.Edge
 
-case class Line(p1:Point2i, p2:Point2i) {
-  def this(x1:Int, y1:Int, x2:Int, y2:Int) = this(Point2i(x1, y1), Point2i(x2, y2))
-  def intersects(other:Line):Boolean = {
-    false
-  }
-}
-case class Polygon(points:Vector[Point2i]) {
-  lazy val lines:Vector[Line] = {
-    val toPair = points(points.length - 1) +: points
-    ((0 until toPair.length - 1) map { i =>
-      val p1 = toPair(i)
-      val p2 = toPair(i+1)
-      Line(p1, p2)
-    }).toVector
-  }
-}
+
+
 
 object PolygonUtils {
 
@@ -30,8 +17,8 @@ object PolygonUtils {
     println(lineToPixels(Point2i(1,1), Point2i(-11,5)))
   }
 
-  def pointInPolygon(poly:Polygon, pt:Point2i):Boolean = {
-    val ray = new Line(pt, Point2i(Int.MaxValue, 0))
+  def pointInPolygon(poly:Polygon, pt:Point2d):Boolean = {
+    val ray = new Line(pt, Point2d(Int.MaxValue, 0))
     val intersections = poly.lines.foldLeft(0){case (acc, line) =>
       if (ray.intersects(line)) {
         acc + 1

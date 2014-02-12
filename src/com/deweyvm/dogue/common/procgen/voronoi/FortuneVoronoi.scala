@@ -1,11 +1,182 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
-import com.deweyvm.gleany.data.{Point2f, Point2d}
+import com.deweyvm.gleany.data.{Point3d, Point2f, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
+import com.deweyvm.dogue.common.Implicits
+import Implicits._
+import scala.math
+import com.deweyvm.dogue.common.procgen.Line
+import scala.util.control.Breaks
+
+case class Edge(triStart:Point2d, triEnd:Point2d, vorStart:Point2d, vorEnd:Point2d) {
+  def toLine = Line(vorStart, vorEnd)
+}
+
 
 object Voronoi {
-  def getEdges()
+  def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int):Vector[Edge] = {
+    val v = new FortuneVoronoi
+    val buff = new ArrayBuffer[Point2d]()
+    points foreach {buff += _}
+    v.GetEdges(buff, width, height).map {edge =>
+      Edge(edge.left, edge.right, edge.start, edge.end)
+    }.toVector
+  }
+
+  def getTouching(lines:Vector[Line], pt:Point2d, sign:Int):Option[(Line, Point2d)] = {
+    val touching = lines filter { l =>
+
+    }
+  }
+
+
+  def followCircular(lines:Vector[Line], line:Line, sign:Int):Option[Vector[Line]] = {
+    val currentPoly = ArrayBuffer[Line]()
+    val startPoint = line.p
+    val endPoint = line.q
+    var currentPoint = startPoint
+    var broke = false
+    Breaks.breakable {
+      while(currentPoint != endPoint) {
+        getTouching(lines, currentPoint, sign) match {
+          case Some((tl, tp)) =>
+            currentPoint = tp
+            currentPoly += tl
+          case None =>
+            broke = true
+            Breaks.break()
+        }
+
+      }
+    }
+    if (!broke && currentPoly.length >= 3) {
+      currentPoly.toVector.some
+    } else {
+      None
+    }
+  }
+
+  def getFaces(edges:Vector[Edge]):Vector[Vector[Line]] = {
+    val result = ArrayBuffer[Vector[Line]]()
+    val lines = edges map {_.toLine}
+    lines.foldLeft(Vector[Vector[Line]]()) { (acc, line) =>
+       acc ++ followCircular(lines, line, 1) ++ followCircular(lines, line, -1)
+    }
+  }
+
+  /**
+   * keep a "store" listing how many polygons an edge is currently in.
+   * every edge is in at most 2 polygons, so once the store hits two, that edge shuold never be used again.
+   * for each edge, check in the store if it has been done twice.
+   * if not, increment the store for tne current edge and walk it clockwise, adding each edge
+   * you find to the polygon. if an edge doesnt have a proper partner, mark that edge as complete
+   * (twice in the store). when finished, do the next edge which doesnt have 2 in the store.
+   * @param edges
+   */
+
+  /*def naiveGetPolys(edges:IndexedSeq[Line]):Vector[Vector[Line]] = {
+    val found = collection.mutable.Map[Line,Int]().withDefaultValue(0)
+
+    /**
+     * return the adjacent winded edge and the new outermost point
+     *
+     *             # <- this point (and its corresponding edge) is returned (if exists)
+     *            #
+     *           #
+     *          #
+     * ######### <- end is this point
+     * @param end
+     * @param sign clockwise or counterclockwise
+     * @return
+     */
+    def findNextEdge(end:Point2d, edge:Line, sign:Int):Option[(Line, Point2d)] = {
+      val touching: IndexedSeq[(Line, Point2d)] = edges.map { e =>
+        if (e == edge) {
+          None
+        } else if (eqPoint(e.vorEnd, end)) {
+          (e, e.vorEnd).some
+        } else if (eqPoint(e.vorStart, end)) {
+          (e, e.vorStart).some
+        } else {
+          None
+        }
+
+      }.flatten
+      println("%d edges touching edge %s" format (touching.length, edge))
+      val what = touching map { case (e,p) =>
+        println(e)
+        (edge, p, edge crossZ e, edge angle e)
+      } filter { case (_,_,m,_) =>
+        math.signum(m).toInt == sign
+      } sortWith { case ((_,_,_,a), (_,_,_,b)) =>
+        a < b
+      }
+
+      if (what.length > 0 && math.signum(what(0)._3).toInt != sign) {
+        throw new Exception
+      } else if (what.length > 0) {
+        val f: (Line, Point2d, Double, Double) = what(0)
+        println(" mag(%.2f) sign(%d) " format (f._3, sign))
+        (f._1, f._2).some
+      } else {
+        None
+      }
+
+      /*val matching: IndexedSeq[Option[(Edge, Point2d)]] = edges.map {p =>
+        val wind = edge.sign(p)
+        if (eqPoint(p.vorEnd, end) && wind == sign) {
+          (p, p.vorStart).some
+        } else if (eqPoint(p.vorStart, end) && wind == sign) {
+          (p, p.vorEnd).some
+        } else {
+          None
+        }
+      }
+      val found: IndexedSeq[Option[(Edge, Point2d)]] = matching.filter{_.isDefined}
+      found match {
+        //case x +: y +: xs => throw new RuntimeException("more than one line with a the given turning")
+        case x +: xs => x
+        case Vector() => None
+      }*/
+    }
+    import scala.util.control.Breaks._
+    val result = ArrayBuffer[Vector[Line]]()
+    def add(sign:Int) {
+      edges foreach { edge =>
+        val start = edge.vorStart
+        val currentPoly = ArrayBuffer[Line]()
+        currentPoly += edge
+        var end: Point2d = edge.vorEnd
+        var next = edge
+        var broke = false
+        breakable {
+          while (end != start) {
+            val n = findNextEdge(end, next, sign)
+            n match {
+              case Some((e, p)) =>
+                end = p
+                next = e
+                println("added")
+                currentPoly += e
+              case None =>
+                broke = true
+                break()
+            }
+          }
+        }
+        found(edge) += 1
+        if (currentPoly.length >= 3) {
+          result += currentPoly.toVector
+        }
+      }
+
+    }
+    println("Adding")
+    add(1)
+    add(-1)
+    result.toVector
+  }*/
 }
 
 /**

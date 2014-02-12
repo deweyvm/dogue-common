@@ -12,7 +12,7 @@ import com.deweyvm.gleany.graphics
 import com.deweyvm.gleany.data.{Point2i, Point2d}
 
 
-object Voronoi {
+object NaiveVoronoi {
   def main(args: Array[String]) {
     //Voronoi.generateVoronoi(4096,4096,30, manhattan)
   }

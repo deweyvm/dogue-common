@@ -17,17 +17,7 @@ object PolygonUtils {
 
   }
 
-  def pointInPolygon(poly:Polygon, pt:Point2d):Boolean = {
-    val ray = new Line(pt, Point2d(Int.MaxValue, 0))
-    val intersections = poly.lines.foldLeft(0){case (acc, line) =>
-      if (ray.intersects(line)) {
-        acc + 1
-      } else {
-        acc
-      }
-    }
-    intersections.isOdd
-  }
+
 
   private def lineToPixels(p1:Point2i, p2:Point2i):Vector[Point2i] = {
     import scala.math._

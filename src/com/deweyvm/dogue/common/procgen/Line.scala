@@ -10,13 +10,14 @@ object Line {
     clockSignTest()
     adjacentTest()
     equalityTest()
+    intersectTest()
   }
 
   private def adjacentTest() {
-    assert(new Line(0,0,1,1).adjacentTo(Point2d(1,1)).isDefined)
-    assert(new Line(0,0,1,1).adjacentTo(Point2d(0,0)).isDefined)
-    assert(!new Line(0,0,1,1).adjacentTo(Point2d(1,2)).isDefined)
-    assert(!new Line(0,0,1,1).adjacentTo(Point2d(2,1)).isDefined)
+    assert(new Line(0,0,1,1).getAdjacent(Point2d(1,1)).isDefined)
+    assert(new Line(0,0,1,1).getAdjacent(Point2d(0,0)).isDefined)
+    assert(!new Line(0,0,1,1).getAdjacent(Point2d(1,2)).isDefined)
+    assert(!new Line(0,0,1,1).getAdjacent(Point2d(2,1)).isDefined)
   }
 
   private def equalityTest() {
@@ -51,13 +52,69 @@ object Line {
       }
     }
   }
+
+  def intersectTest() {
+    def assertRes(l1:Line, l2:Line, expected:Option[Point2d]) {
+      val result = l1 intersectPoint l2
+      assert(result == expected, "expected(%s) != %s" format (expected, result))
+      ()
+    }
+    val tests = List(
+      (new Line(0,0,1,1), new Line(0,1,1,0), Point2d(0.5,0.5).some),
+      (new Line(0,-1,0,1), new Line(-1,0,1,0), Point2d(0,0).some),
+      (new Line(0,0,0,1), new Line(0,0,1,0), Point2d(0,0).some),
+      (new Line(0,0,0,1), new Line(1,1,0,1), Point2d(0,1).some),
+      (new Line(0,0,0,1), new Line(0,0,0,1), None),
+      (new Line(0,0,0,1), new Line(0,3,0,4), None)
+
+
+    )
+    tests foreach (assertRes _).tupled
+  }
 }
 
 case class Line(p:Point2d, q:Point2d) {
   def this(x1:Double, y1:Double, x2:Double, y2:Double) = this(Point2d(x1, y1), Point2d(x2, y2))
-  def intersects(other:Line):Boolean = {
-    false
+
+  //http://stackoverflow.com/a/14795484/892213
+  def intersectPoint(other:Line):Option[Point2d] = {
+
+    val s10_x = q.x - p.x
+    val s10_y = q.y - p.y
+    val s32_x = other.q.x - other.p.x
+    val s32_y = other.q.y - other.p.y
+
+    val denom = s10_x * s32_y - s32_x * s10_y
+    if (denom == 0)
+      return None // Collinear
+
+    if (other.getAdjacent(p).isDefined) {
+      return p.some
+    } else if (other.getAdjacent(q).isDefined) {
+      return q.some
+    }
+    val denomPositive = denom > 0
+
+    val s02_x = p.x - other.p.x
+    val s02_y = p.y - other.p.y
+    val s_numer = s10_x * s02_y - s10_y * s02_x
+    if ((s_numer < 0) == denomPositive)
+      return None // No collision
+
+    val t_numer = s32_x * s02_y - s32_y * s02_x
+    if ((t_numer < 0) == denomPositive)
+      return None // No collision
+
+    if (((s_numer > denom) == denomPositive) || ((t_numer > denom) == denomPositive))
+      return None // No collision
+    // Collision detected
+    val t = t_numer / denom
+    Point2d(p.x + (t * s10_x), p.y + (t * s10_y)).some
+
   }
+
+
+
   def clockSign(other:Line):Int = {
     val p1 = p - q
     val p2 = -(other.p - other.q)
@@ -77,7 +134,7 @@ case class Line(p:Point2d, q:Point2d) {
   }
 
   //Line must be reoriented such that the back is the start point and the front is the end point
-  def adjacentTo(pt:Point2d):Option[Line] = {
+  def getAdjacent(pt:Point2d):Option[Line] = {
     if (pt == p) {
       this.some
     } else if (pt == q) {

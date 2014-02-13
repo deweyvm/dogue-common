@@ -118,6 +118,8 @@ object Voronoi {
       (polys ++ ccw ++ cw, s2)
     }
 
-    Set(faces._1:_*).toVector
+    val result = Set(faces._1:_*).toVector
+    println(result.length)
+    result
   }
 }

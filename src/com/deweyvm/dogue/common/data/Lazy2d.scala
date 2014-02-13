@@ -1,12 +1,16 @@
 package com.deweyvm.dogue.common.data
 
-import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import scala.collection.mutable
 
+object Lazy2d {
+  def tabulate[T](cols:Int, rows:Int)(getter:(Int, Int) => T):Lazy2d[T] = {
+    new Lazy2d(getter, cols, rows)
+  }
+}
 
-class Lazy2d[T](getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends Indexed2d[T] {
+class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   private val buffer = mutable.Map[Int,T]()
   private val set = mutable.Map[Int,Boolean]().withDefaultValue(false)
 

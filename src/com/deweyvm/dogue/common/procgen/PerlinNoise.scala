@@ -72,14 +72,10 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
     def func(x:Int, y:Int) = {
       fBm(freq*x, freq*y, (size*freq).toInt, octaves)
     }
-    new Lazy2d(func, size, size)
+    Lazy2d.tabulate(size, size)(func)
   }
 
   def render:Array2d[Double] = {
-    /*val freq = 1/32.0
-    val size = 256
-    val octs = 5*/
-
     Array2d.parTabulate(size, size) { case (x, y) =>
       fBm(freq*x, freq*y, (size*freq).toInt, octaves)
     }

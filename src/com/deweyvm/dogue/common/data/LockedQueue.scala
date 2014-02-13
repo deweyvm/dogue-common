@@ -48,7 +48,7 @@ object LockedQueue {
       threads foreach {_.join()}
       val result = size == q.length
       if (!result) {
-        println(q.length - size)
+        Test.outputln(q.length - size)
       }
       result
 

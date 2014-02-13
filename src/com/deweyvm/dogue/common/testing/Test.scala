@@ -8,6 +8,15 @@ import org.scalacheck.util.ConsoleReporter
 import org.scalacheck.Test.Result
 
 object Test {
+  def output(s:String) = {
+    print(s)
+    System.out.flush()
+  }
+  def outputln(s:String) = {
+    println(s)
+    System.out.flush()
+  }
+
   def runScalaCheck(p:Prop, workers:Int) {
     p.check(new Default{}.
       withWorkers(workers).

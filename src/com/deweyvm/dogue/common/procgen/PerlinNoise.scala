@@ -85,15 +85,17 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Int) {
     }
   }
 
-  def printFrequencies(rendered:Array2d[Double]) {
+  def printFrequencies(rendered:Array2d[Double]):String = {
+    val result = new StringBuilder
     val grouped = rendered.groupBy(d => (d*10).toInt)
     for (i <- -10 until 10) {
       if (grouped.contains(i)) {
-        print(i)
-        println("    " + grouped(i).length)
+        result append i.toString
+        result append ("    " + grouped(i).length + "\n")
       }
     }
-    println("%f, %f" format (rendered.max, rendered.min))
+    result append "%f, %f\n" format (rendered.max, rendered.min)
+    result.mkString
   }
 
 

@@ -44,17 +44,14 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
   private val cols:Int = (width/cellSize).toInt
   private val rows:Int = (height/cellSize).toInt
   private val grid = Array.fill[Option[Point2d]](cols, rows)(None)
-  private val points:Vector[Point2d] = samplePoints.toVector
-  println(getPoints)
+
   private def create() = {
     val first = Point2d(Random.nextDouble*width, Random.nextDouble*height)
     processList += first
     samplePoints += first
     while(!processList.isEmpty) {
-      //print(processList.length)
       val point = processList.pop()
 
-      //println(" " + processList.length)
       for (i <- 0 until numPoints) {
 
         val next = generateRandomPointAround(point)
@@ -71,7 +68,6 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
 
   }
 
-  def getPoints = samplePoints.toVector
 
   private def inBounds(point:Point2d) = {
     point.x > 0 && point.x < width && point.y > 0 && point.y < height
@@ -117,5 +113,7 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
 
 
   create()
+  private val points:Vector[Point2d] = samplePoints.toVector
+  def getPoints = points
 
 }

@@ -20,9 +20,9 @@ object TestManager {
       def name = n
     }} foreach { test =>
       test.run() match {
-      case TestPass => println("[PASS] %15s" format test.name)
+      case TestPass => Test.outputln("[PASS] %15s" format test.name)
       case TestFail(msg) =>
-        println("[FAIL] %15s" format test.name)
+        Test.outputln("[FAIL] %15s" format test.name)
         if (failFirst) {
           throw new RuntimeException("Test failure: " + test.name + "\n" + msg)
         }

@@ -89,16 +89,14 @@ object CommandParser {
           val parsed = parser.getCommand(input)
           parsed match {
             case Invalid(input, msg) =>
-              System.out.println("Failed to parse: %s" format input)
-              System.out.flush()
+              Test.outputln("Failed to parse: %s" format input)
               false
             case p@Command(_,_,_,_) =>
               val l = lhs(p)
               val r = rhs(command)
               val result = l == r
               if (!result) {
-                System.out.println("%s: \n[PARSE]%s != \n[GIVEN]%s" format (command.toString, l, r))
-                System.out.flush()
+                Test.outputln("%s: \n[PARSE]%s != \n[GIVEN]%s" format (command.toString, l, r))
               }
               result
           }

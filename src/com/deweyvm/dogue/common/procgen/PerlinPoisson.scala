@@ -5,7 +5,6 @@ class PerlinPoisson(val size:Int, val minDist:Int, freq:Double, octaves:Int, see
   val rng = new PoissonRng(size,size, {
     case (i, j) => perlin.get(i, j).map{t =>
       val x = t*35
-      //println(x)
       math.max(x, minDist)
     }.getOrElse(10)
   }, minDist)

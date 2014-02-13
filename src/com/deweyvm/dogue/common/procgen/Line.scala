@@ -3,6 +3,8 @@ package com.deweyvm.dogue.common.procgen
 import com.deweyvm.gleany.data.Point2d
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
+import java.util.Objects
+
 object Line {
   def test() {
     clockSignTest()
@@ -94,6 +96,14 @@ case class Line(p:Point2d, q:Point2d) {
 
     }
   }
+
+  override def hashCode() = {
+    super.hashCode()
+    def toD(d:Double):Int = java.lang.Double.doubleToRawLongBits(d).toInt
+    val const = 71
+    List(p.x, p.y, q.x, q.y).foldLeft(const) {case (acc:Int, i:Double) => acc*const + toD(i)}
+
+}
 
 
   override def toString = "<%.2f,%.2f --- %.2f,%.2f>" format (p.x, p.y, q.x, q.y)

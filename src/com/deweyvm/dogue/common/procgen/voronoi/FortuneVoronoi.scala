@@ -70,18 +70,19 @@ object Voronoi {
     var broke = false
     Breaks.breakable {
       while(currentPoint != endPoint) {
+        currentPoly += currentLine
+        println("Current polygon:")
+        currentPoly foreach {p =>
+          println("    " + p)
+        }
         println()
         println("next line   " + currentLine)
         println("endpoint is " + currentPoint)
         getNext(lines, currentLine, currentPoint, sign) match {
           case Some((tl, tp)) =>
             currentPoint = tp
-            currentPoly += tl
             currentLine = tl
-            println("Current polygon:")
-            currentPoly foreach {p =>
-              println("    " + p)
-            }
+
             if (currentPoly.length > lines.length) {
               Breaks.break()
             }
@@ -94,7 +95,9 @@ object Voronoi {
       }
     }
     if (!broke && currentPoly.length >= 3) {
+      currentPoly += currentLine
       println("~~~~~~~~~~ACCEPT~~~~~~~~~")
+
       currentPoly.toVector.some
     } else {
       None

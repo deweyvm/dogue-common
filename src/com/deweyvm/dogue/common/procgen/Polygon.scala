@@ -1,5 +1,7 @@
 package com.deweyvm.dogue.common.procgen
 
+import com.deweyvm.gleany.data.Point2d
+
 case class Polygon(points:Vector[Point2d]) {
   lazy val lines:Vector[Line] = {
     val toPair = points(points.length - 1) +: points

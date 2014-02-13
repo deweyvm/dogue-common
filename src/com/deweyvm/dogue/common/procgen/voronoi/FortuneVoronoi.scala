@@ -23,27 +23,70 @@ object Voronoi {
       Edge(edge.left, edge.right, edge.start, edge.end)
     }.toVector
   }
-
-  def getTouching(lines:Vector[Line], pt:Point2d, sign:Int):Option[(Line, Point2d)] = {
-    val touching = lines filter { l =>
-
+  /*
+   */
+  def getNext(lines:Vector[Line], line:Line, pt:Point2d, sign:Int):Option[(Line, Point2d)] = {
+    val adjacent = lines.map {l => l adjacentTo pt}.flatten
+    val touching = adjacent filter { l =>
+      val sameLine = l == line
+      val sameSign = (l clockSign line) == sign
+      if (sameLine) {
+        println("Ruled out %s same line" format l)
+      }
+      if (!sameSign) {
+        println("Ruled out %s wrong sign" format l)
+      }
+      val result = !sameLine && sameSign
+      if (result) {
+        println("%s is acceptible" format l)
+      }
+      result
     }
+    val sorted = touching sortBy { l =>
+      println("    " + l)
+      line clockAngle l
+    }
+    sorted match {
+      case x +: xs =>
+        if (pt == x.p) {
+          println("endpoint is " + x.q)
+          (x, x.q).some
+        } else {
+          println("endpoint is " + x.p)
+          (x, x.p).some
+        }
+      case _ => None
+    }
+
   }
 
 
   def followCircular(lines:Vector[Line], line:Line, sign:Int):Option[Vector[Line]] = {
     val currentPoly = ArrayBuffer[Line]()
-    val startPoint = line.p
-    val endPoint = line.q
+    val startPoint = line.q
+    val endPoint = line.p
+    var currentLine = line
     var currentPoint = startPoint
     var broke = false
     Breaks.breakable {
       while(currentPoint != endPoint) {
-        getTouching(lines, currentPoint, sign) match {
+        println()
+        println("next line   " + currentLine)
+        println("endpoint is " + currentPoint)
+        getNext(lines, currentLine, currentPoint, sign) match {
           case Some((tl, tp)) =>
             currentPoint = tp
             currentPoly += tl
+            currentLine = tl
+            println("Current polygon:")
+            currentPoly foreach {p =>
+              println("    " + p)
+            }
+            if (currentPoly.length > lines.length) {
+              Breaks.break()
+            }
           case None =>
+            println("~~~~~~~~~~BROKE~~~~~~~~~~")
             broke = true
             Breaks.break()
         }
@@ -51,6 +94,7 @@ object Voronoi {
       }
     }
     if (!broke && currentPoly.length >= 3) {
+      println("~~~~~~~~~~ACCEPT~~~~~~~~~")
       currentPoly.toVector.some
     } else {
       None
@@ -58,10 +102,9 @@ object Voronoi {
   }
 
   def getFaces(edges:Vector[Edge]):Vector[Vector[Line]] = {
-    val result = ArrayBuffer[Vector[Line]]()
     val lines = edges map {_.toLine}
     lines.foldLeft(Vector[Vector[Line]]()) { (acc, line) =>
-       acc ++ followCircular(lines, line, 1) ++ followCircular(lines, line, -1)
+       acc ++ followCircular(lines, line, -1) ++ followCircular(lines, line, 1)
     }
   }
 

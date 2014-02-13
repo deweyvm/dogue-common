@@ -2,7 +2,7 @@ package com.deweyvm.dogue.common.testing
 
 import com.deweyvm.dogue.common.data.{Array2d, EnrichedString, LockedQueue}
 import com.deweyvm.dogue.common.parsing.CommandParser
-import com.deweyvm.dogue.common.procgen.PolygonUtils
+import com.deweyvm.dogue.common.procgen.{Line, PolygonUtils}
 
 object TestManager {
   private val tests = Vector[(() => Unit, String)](
@@ -10,7 +10,8 @@ object TestManager {
     (Array2d.test, "Array2d"),
     (EnrichedString.test, "EnrichedString"),
     (LockedQueue.test, "LockedQueue"),
-    (PolygonUtils.test, "PolygonUtils")
+    (PolygonUtils.test, "PolygonUtils"),
+    (Line.test, "Line")
   )
 
   def runAll(failFirst:Boolean) {

@@ -14,7 +14,7 @@ object PolygonUtils {
   def test() {
     val p1 = Point2i(0,0)
     val p2 = Point2i(-11,5)
-    println(lineToPixels(Point2i(1,1), Point2i(-11,5)))
+    //println(lineToPixels(Point2i(1,1), Point2i(-11,5)))
   }
 
   def pointInPolygon(poly:Polygon, pt:Point2d):Boolean = {

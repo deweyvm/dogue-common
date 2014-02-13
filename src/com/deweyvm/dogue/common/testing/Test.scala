@@ -12,8 +12,8 @@ object Test {
     print(s)
     System.out.flush()
   }
-  def outputln(s:String) = {
-    println(s)
+  def outputln(s:Any) = {
+    println(s.toString)
     System.out.flush()
   }
 

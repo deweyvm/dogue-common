@@ -7,8 +7,8 @@ import scala.util.Random
 
 import scala.math.{sin,cos}
 
-class RandomQueue[T](seed:Option[Long] = None) {
-  private val qSeed = seed.getOrElse(System.nanoTime)
+class RandomQueue[T](seed:Long) {
+  private val qSeed = seed
   private val random = new Random(qSeed)
   private val buffer = new ArrayBuffer[T]()
   def +=(item:T) = {
@@ -34,7 +34,8 @@ class RandomQueue[T](seed:Option[Long] = None) {
 
 
 
-class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Double, maxDist:Double, seed:Option[Long]=None) {
+class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Double, maxDist:Double, seed:Long) {
+  private val random = new Random(seed)
   private val Pi = 3.14159265358979
   private val numPoints = 100
   //private val minDist = 10.0
@@ -46,7 +47,7 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
   private val grid = Array.fill[Option[Point2d]](cols, rows)(None)
 
   private def create() = {
-    val first = Point2d(Random.nextDouble*width, Random.nextDouble*height)
+    val first = Point2d(random.nextDouble*width, random.nextDouble*height)
     processList += first
     samplePoints += first
     while(!processList.isEmpty) {
@@ -91,13 +92,13 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
   private def squareAroundPoint(point:Point2d): IndexedSeq[(Int, Int)] = {
      val (i,j) = imageToGrid(point)
      for (ii <- (i - span) to (i + span);
-        jj <- (j - span) to (j + span))
+          jj <- (j - span) to (j + span))
        yield ((ii + cols) % cols, (jj + rows) % rows)
   }
 
   private def generateRandomPointAround(point:Point2d) = {
-    val r1 = Random.nextDouble()
-    val r2 = Random.nextDouble()
+    val r1 = random.nextDouble()
+    val r2 = random.nextDouble()
     val radius = maxDist*(r1 + 1)
     val angle = 2 * Pi * r2
     val x = point.x + radius * cos(angle)

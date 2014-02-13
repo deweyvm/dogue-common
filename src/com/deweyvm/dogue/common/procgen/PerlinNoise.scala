@@ -16,7 +16,7 @@ object PerlinNoise {
   }
 }
 
-class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Int) {
+class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
   private val whatDoesThisVariableMean = size
   private val random = new Random(seed)
   private val perm: IndexedSeq[Int] = {

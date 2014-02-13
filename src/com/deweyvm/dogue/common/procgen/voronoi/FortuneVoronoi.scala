@@ -22,6 +22,8 @@ object Voronoi {
     }
   }
 
+  type LineMap = Set[Line]
+
   def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int):Vector[Edge] = {
     val v = new FortuneVoronoi
     val buff = new ArrayBuffer[Point2d]()
@@ -65,7 +67,7 @@ object Voronoi {
     }
   }
 
-  def followCircular(lines:Vector[Line], line:Line, sign:Int, rect:Rectd):Option[Vector[Line]] = {
+  def followCircular(set:LineMap, lines:Vector[Line], line:Line, sign:Int, rect:Rectd):(LineMap, Option[Vector[Line]]) = {
     val currentPoly = ArrayBuffer[Line]()
     val startPoint = line.q
     val endPoint = line.p
@@ -102,22 +104,24 @@ object Voronoi {
       currentPoly += currentLine
       debug("~~~~~~~~~~ACCEPT~~~~~~~~~")
       if (currentPoly.exists{l => !rect.contains(l.p) || !rect.contains(l.q)}) {
-        None
+        (set, None)
       } else {
-        currentPoly.toVector.some
+        (set, currentPoly.toVector.some)
 
       }
     } else {
-      None
+      (set, None)
     }
   }
 
   def getFaces(edges:Vector[Edge], rect:Rectd):Vector[Vector[Line]] = {
     val lines = edges map {_.toLine}
-    val faces = lines.foldLeft(Vector[Vector[Line]]()) { (acc, line) =>
-       acc ++ followCircular(lines, line, -1, rect) ++ followCircular(lines, line, 1, rect)
+    val faces = lines.foldLeft((Vector[Vector[Line]](), Set[Line]())) { case ((polys, set), line) =>
+      val (s1, ccw) = followCircular(set, lines, line, -1, rect)
+      val (s2, cw) = followCircular(s1, lines, line, 1, rect)
+      (polys ++ ccw ++ cw, s2)
     }
-    faces
+    faces._1
   }
 }
 

@@ -24,6 +24,28 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, 40, ddx, ddy)
   }
 
+  def test() {
+    def takeGradient(ones:Vector[(Int,Int)]) = gradient(Array2d.tabulate(3,3) {case (i, j)  =>
+      if (ones.contains((i, j))) {
+        1
+      } else {
+        0
+      }
+    }, 1, 1)
+
+    val tests = List(
+      (Vector((1,1)), Point2d(0,0)),
+      (Vector((0,0), (2,2)), Point2d(0,0)),
+      (Vector((0,2), (2,0)), Point2d(0,0)),
+      (Vector((0,2), (2,0), (1,1)), Point2d(0,1))
+    )
+
+    tests foreach { case (ones, expected) =>
+      val grad = takeGradient(ones)
+      assert(expected == grad, "Expected (%s) got (%s) for (%s)" format (expected, grad, ones))
+    }
+  }
+
   def gradient(array:Indexed2d[Double], i:Int, j:Int):Option[Point2d] = {
     val grid: Indexed2d[Double] = array.slice(i-1, j-1, 3, 3, x => x, 0)
     def p(x:Double, y:Double) = Point2d(x, y)
@@ -38,28 +60,29 @@ object VectorField {
       c21 <- grid.get(2,1)
       c22 <- grid.get(2,2)
     } yield {
-      val v00 = (c00 - c00) *: (p(0,0) - p(0,0))
-      val v01 = (c00 - c01) *: (p(0,0) - p(0,1))
-      val v02 = (c00 - c02) *: (p(0,0) - p(0,2))
-      val v10 = (c00 - c10) *: (p(0,0) - p(1,0))
-      val v11 = (c00 - c11) *: (p(0,0) - p(1,1))
-      val v12 = (c00 - c12) *: (p(0,0) - p(1,2))
-      val v20 = (c00 - c20) *: (p(0,0) - p(2,0))
-      val v21 = (c00 - c21) *: (p(0,0) - p(2,1))
-      val v22 = (c00 - c22) *: (p(0,0) - p(2,2))
-      (v00 + v01 + v02 + v10 + v11 + v12 + v20 + v21 + v22)/8
+      val v00 = (c11 - c00) *: (p(1,1) - p(0,0))
+      val v01 = (c11 - c01) *: (p(1,1) - p(0,1))
+      val v02 = (c11 - c02) *: (p(1,1) - p(0,2))
+      val v10 = (c11 - c10) *: (p(1,1) - p(1,0))
+      val v11 = (c11 - c11) *: (p(1,1) - p(1,1))
+      val v12 = (c11 - c12) *: (p(1,1) - p(1,2))
+      val v20 = (c11 - c20) *: (p(1,1) - p(2,0))
+      val v21 = (c11 - c21) *: (p(1,1) - p(2,1))
+      val v22 = (c11 - c22) *: (p(1,1) - p(2,2))
+      println(v01)
+      println(v02)
+      println(v10)
+      println(v11)
+      println(v12)
+      println(v20)
+      println(v21)
+      println(v22)
+      (v00 + v01 + v02 + v10 /*+ v11*/ + v12 + v20 + v21 + v22)/8
     }
   }
 
   def windSpiral(width:Int, height:Int, scale:Int) = {
-    println(gradient(Array2d.tabulate(3,3) {case (i, j) =>
-      if (i == 0 && j == 0) {
-        1.0
-      } else {
-        0.0
-      }
 
-    }, 0, 0))
     val noise = new PerlinNoise(1/32.0, 5, width, 0L)
     val r = new Random(0)
     val land = (0 until 4) map {_ => Point2d((r.nextDouble() - 0.5)*width/scale*2,
@@ -73,7 +96,7 @@ object VectorField {
         (pt - mp).magnitude < 50
       }.map { (pt:Point2d) =>
         val dir = mp.normalize
-        (20/(pt - mp).magnitude.sqrt) *: (dir)
+        (20/(pt - mp).magnitude.sqrt) *: dir
       }
 
       vectors.foldLeft(Point2d.Zero) {case (acc, pt) => acc + pt}

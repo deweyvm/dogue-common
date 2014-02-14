@@ -17,5 +17,6 @@ class EnrichedNumber[T](rep:T)(implicit n: Numeric[T]) {
   def isEven:Boolean = n.toInt(rep) % 2 == 0
   def isOdd:Boolean = n.toInt(rep) % 2 == 1
 
+  def sqrt:Double = math.sqrt(n.toDouble(rep))
 }
 

@@ -37,7 +37,12 @@ object VectorField {
       (Vector((1,1)), Point2d(0,0)),
       (Vector((0,0), (2,2)), Point2d(0,0)),
       (Vector((0,2), (2,0)), Point2d(0,0)),
-      (Vector((0,2), (2,0), (1,1)), Point2d(0,1))
+      (Vector((0,2), (2,0), (1,1)), Point2d(0,0)),
+      (Vector((0,2), (0,0)), Point2d(-0.25,0)),
+      (Vector((2,0), (0,0)), Point2d(0,-0.25)),
+      (Vector((2,0), (2,2)), Point2d(0.25,0)),
+      (Vector((0,2), (2,2)), Point2d(0, 0.25))
+
     )
 
     tests foreach { case (ones, expected) =>
@@ -46,39 +51,38 @@ object VectorField {
     }
   }
 
-  def gradient(array:Indexed2d[Double], i:Int, j:Int):Option[Point2d] = {
+  /**
+   * out of bounds elements are treated as the same as the center tile
+   * @param array
+   * @param i
+   * @param j
+   * @return
+   */
+  def gradient(array:Indexed2d[Double], i:Int, j:Int):Point2d = {
     val grid: Indexed2d[Double] = array.slice(i-1, j-1, 3, 3, x => x, 0)
     def p(x:Double, y:Double) = Point2d(x, y)
-    for{
-      c00 <- grid.get(0,0)
-      c01 <- grid.get(0,1)
-      c02 <- grid.get(0,2)
-      c10 <- grid.get(1,0)
-      c11 <- grid.get(1,1)
-      c12 <- grid.get(1,2)
-      c20 <- grid.get(2,0)
-      c21 <- grid.get(2,1)
-      c22 <- grid.get(2,2)
-    } yield {
-      val v00 = (c11 - c00) *: (p(1,1) - p(0,0))
-      val v01 = (c11 - c01) *: (p(1,1) - p(0,1))
-      val v02 = (c11 - c02) *: (p(1,1) - p(0,2))
-      val v10 = (c11 - c10) *: (p(1,1) - p(1,0))
-      val v11 = (c11 - c11) *: (p(1,1) - p(1,1))
-      val v12 = (c11 - c12) *: (p(1,1) - p(1,2))
-      val v20 = (c11 - c20) *: (p(1,1) - p(2,0))
-      val v21 = (c11 - c21) *: (p(1,1) - p(2,1))
-      val v22 = (c11 - c22) *: (p(1,1) - p(2,2))
-      println(v01)
-      println(v02)
-      println(v10)
-      println(v11)
-      println(v12)
-      println(v20)
-      println(v21)
-      println(v22)
-      (v00 + v01 + v02 + v10 /*+ v11*/ + v12 + v20 + v21 + v22)/8
-    }
+
+    val c11:Double = grid.get(1,1).getOrElse(0.0)
+    val c00:Double = grid.get(0,0).getOrElse(c11)
+    val c01:Double = grid.get(0,1).getOrElse(c11)
+    val c02:Double = grid.get(0,2).getOrElse(c11)
+    val c10:Double = grid.get(1,0).getOrElse(c11)
+    val c12:Double = grid.get(1,2).getOrElse(c11)
+    val c20:Double = grid.get(2,0).getOrElse(c11)
+    val c21:Double = grid.get(2,1).getOrElse(c11)
+    val c22:Double = grid.get(2,2).getOrElse(c11)
+
+    val v00 = (c11 - c00) *: (p(1,1) - p(0,0))
+    val v01 = (c11 - c01) *: (p(1,1) - p(0,1))
+    val v02 = (c11 - c02) *: (p(1,1) - p(0,2))
+    val v10 = (c11 - c10) *: (p(1,1) - p(1,0))
+    //val v11 = (c11 - c11) *: (p(1,1) - p(1,1)) //this is always zero
+    val v12 = (c11 - c12) *: (p(1,1) - p(1,2))
+    val v20 = (c11 - c20) *: (p(1,1) - p(2,0))
+    val v21 = (c11 - c21) *: (p(1,1) - p(2,1))
+    val v22 = (c11 - c22) *: (p(1,1) - p(2,2))
+    (v00 + v01 + v02 + v10 /*+ v11*/ + v12 + v20 + v21 + v22)/8
+
   }
 
   def windSpiral(width:Int, height:Int, scale:Int) = {

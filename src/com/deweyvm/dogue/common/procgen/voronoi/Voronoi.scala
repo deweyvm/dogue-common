@@ -119,7 +119,6 @@ object Voronoi {
     }
 
     val result = Set(faces._1:_*).toVector
-    println(result.length)
     result
   }
 }

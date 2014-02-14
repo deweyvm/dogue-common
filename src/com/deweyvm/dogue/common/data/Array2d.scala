@@ -116,9 +116,9 @@ class Array2d[+T](val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexe
     new Array2d(elements.updated(coordsToIndex(i, j, cols), t), cols, rows)
 
 
-  def slice(x:Int, y:Int, width:Int, height:Int):Array2d[Option[T]] = {
+  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Array2d[K] = {
     Array2d.tabulate(width, height) { case (i, j) =>
-      get(i + x, j + y)
+      get(i + x, j + y).map(f).getOrElse(default)
     }
   }
 

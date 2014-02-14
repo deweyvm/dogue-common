@@ -9,6 +9,6 @@ trait Indexed2d[+T] {
 
   def cut[K](c:Int, r:Int, f:T => K, default: => K):Indexed2d[K]
   def get(i:Int, j:Int):Option[T]
-  def slice(x:Int, y:Int, width:Int, height:Int):Indexed2d[Option[T]]
+  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Indexed2d[K]
   def sample(div:Int):Indexed2d[T]
 }

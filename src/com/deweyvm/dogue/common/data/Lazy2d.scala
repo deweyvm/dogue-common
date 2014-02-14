@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.dogue.common.Implicits
+import com.deweyvm.dogue.common.{data, Implicits}
 import Implicits._
 import scala.collection.mutable
 
@@ -63,9 +63,9 @@ class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends
     new Lazy2d(newGetter, c, r)
   }
 
-  def slice(x:Int, y:Int, width:Int, height:Int):Lazy2d[Option[T]] = {
-    def newGetter(i:Int, j:Int):Option[T] = {
-      get(i + x, j + y)
+  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Lazy2d[K] = {
+    def newGetter(i:Int, j:Int) = {
+      get(i + x, j + y).map(f).getOrElse(default)
     }
     new Lazy2d(newGetter, width, height)
   }

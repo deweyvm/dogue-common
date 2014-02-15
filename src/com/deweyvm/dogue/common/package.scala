@@ -9,6 +9,7 @@ import scala.language.experimental.macros
 
 
 package object common {
+  def id[T](x:T) = x
   object Implicits {
     implicit def any2Option[A](x: A):EnrichedOption[A] = new EnrichedOption(x)
     implicit def number2EnrichedNumber[A](rep:A)(implicit n:Numeric[A]) = new EnrichedNumber(rep)

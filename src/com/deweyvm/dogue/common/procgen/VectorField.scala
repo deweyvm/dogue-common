@@ -63,6 +63,7 @@ object VectorField {
     def p(x:Double, y:Double) = Point2d(x, y)
 
     val c11:Double = grid.get(1,1).getOrElse(0.0)
+
     val c00:Double = grid.get(0,0).getOrElse(c11)
     val c01:Double = grid.get(0,1).getOrElse(c11)
     val c02:Double = grid.get(0,2).getOrElse(c11)
@@ -131,12 +132,18 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
   }
 
-  def perlinWind(noise:Indexed2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
-    val max = Point2d(width, height).magnitude
-
-    def pow(k:Double) = math.pow(k, 1.15)
+  def perlinWind(solidElevation:Double, noise:Indexed2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
+    def pow(k:Double) = math.pow(k, 1.25)
     def getInfluence(i:Double, j:Double):Point2d = {
-      Point2d.Zero//gradient(noise, i.toInt, j.toInt).normalize.rotate(-3.1415/2)
+      val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
+      val factor =
+        if (atPoint < solidElevation) {
+          atPoint/10
+        } else {
+          println(atPoint)
+          atPoint
+        }
+      gradient(noise, i.toInt, j.toInt).normalize.rotate(3.1415)*factor
     }
     def xx(i:Double) = 0.5 - i/width
     def yy(j:Double) = 0.5 - j/height
@@ -144,19 +151,20 @@ object VectorField {
       val x = xx(i)
       val y = yy(j)
       val p = Point2d(x, y)
-      val mag = /*(pow(0.5) - */pow(p.magnitude)
-      val result = mag * p.normalize.y + getInfluence(x, y).x
-      println("%.2f, %.2f" format (xx(0), yy(0)))
-      result
+      val mag = pow(0.3) - pow(p.magnitude)
+      val result = mag * p.normalize.y + getInfluence(i, j).x
+      //println("%.2f, %.2f" format (xx(0), yy(0)))
+      result*2
     }
     def ddy(i:Double, j:Double):Double = {
       val x = xx(i)
       val y = yy(j)
       val p = Point2d(x, y)
-      val mag = /*(pow(0.5) - */pow(p.magnitude)
-      -mag * p.normalize.x + getInfluence(x, y).y
+      val mag = pow(0.3) - pow(p.magnitude)
+      val result = -mag * p.normalize.x + getInfluence(i, j).y
+      result*2
     }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
+    new VectorField(0, 0, width, height, scale, ddx, ddy)
   }
 
 

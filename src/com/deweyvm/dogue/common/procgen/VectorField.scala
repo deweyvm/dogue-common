@@ -136,22 +136,24 @@ object VectorField {
 
     def pow(k:Double) = math.pow(k, 1.15)
     def getInfluence(i:Double, j:Double):Point2d = {
-      gradient(noise, i.toInt, j.toInt).normalize.rotate(-3.1415/2)
+      Point2d.Zero//gradient(noise, i.toInt, j.toInt).normalize.rotate(-3.1415/2)
     }
-    def xx(i:Double) = width/2 - i
-    def yy(j:Double) = height/2 - j
+    def xx(i:Double) = 0.5 - i/width
+    def yy(j:Double) = 0.5 - j/height
     def ddx(i:Double, j:Double):Double = {
       val x = xx(i)
       val y = yy(j)
       val p = Point2d(x, y)
-      val mag = (pow(max) - pow(p.magnitude))/max
-      mag * p.normalize.y + getInfluence(x, y).x
+      val mag = /*(pow(0.5) - */pow(p.magnitude)
+      val result = mag * p.normalize.y + getInfluence(x, y).x
+      println("%.2f, %.2f" format (xx(0), yy(0)))
+      result
     }
     def ddy(i:Double, j:Double):Double = {
       val x = xx(i)
       val y = yy(j)
       val p = Point2d(x, y)
-      val mag = (pow(max) - pow(p.magnitude))/max
+      val mag = /*(pow(0.5) - */pow(p.magnitude)
       -mag * p.normalize.x + getInfluence(x, y).y
     }
     new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
@@ -227,6 +229,11 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
   }
 
+  def magToColor(mag:Double):Color = {
+    //Color.fromHsb((mag.toFloat/100 + 0.45f) % 1)
+    Color.fromHsb((mag.toFloat + 0.35f) % 1)
+  }
+
 }
 
 class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, ddx:(Double, Double) => Double, ddy:(Double, Double) => Double) {
@@ -242,7 +249,7 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, ddx:(Double, Dou
     val y = ddy(i, j)
     val v = Point2d(x, y)
     val mag = v.magnitude.clamp(0.01,50)
-    val color = Color.fromHsb((mag.toFloat/100 + 0.45f) % 1)
+    val color = VectorField.magToColor(mag)
     val d = v.normalize
     (Point2d(i*div, j*div), Arrow(d, mag), color)
   }

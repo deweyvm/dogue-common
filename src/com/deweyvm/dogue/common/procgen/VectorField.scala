@@ -241,8 +241,8 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, ddx:(Double, Dou
     val x = ddx(i, j)
     val y = ddy(i, j)
     val v = Point2d(x, y)
-    val mag = v.magnitude.clamp(10,50)
-    val color = Color.fromHsb((mag.toFloat + 0.45f) % 1)
+    val mag = v.magnitude.clamp(0.01,50)
+    val color = Color.fromHsb((mag.toFloat/100 + 0.45f) % 1)
     val d = v.normalize
     (Point2d(i*div, j*div), Arrow(d, mag), color)
   }

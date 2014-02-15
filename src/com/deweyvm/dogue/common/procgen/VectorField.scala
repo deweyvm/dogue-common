@@ -9,19 +9,13 @@ import com.deweyvm.dogue.common.data.{Lazy2d, Array2d, Indexed2d}
 
 object VectorField {
   def simpleSpiral(width:Int, height:Int) = {
-    def ddx(i:Double, j:Double):Double = {
+    def dd(i:Double, j:Double):Point2d = {
       val x = i
       val y = j
       val mag = Point2d(x, y).magnitude
-      y*mag
+      Point2d(y*mag, -x*mag)
     }
-    def ddy(i:Double, j:Double):Double = {
-      val x = i
-      val y = j
-      val mag = Point2d(x, y).magnitude
-      -x*mag
-    }
-    new VectorField(-width, -height, 2*width, 2*height, 40, ddx, ddy)
+    new VectorField(-width, -height, 2*width, 2*height, 40, dd)
   }
 
   def test() {
@@ -104,17 +98,13 @@ object VectorField {
 
       vectors.foldLeft(Point2d.Zero) {case (acc, pt) => acc + pt}
     }
-    def ddx(i:Double, j:Double):Double = {
+    def dd(i:Double, j:Double):Point2d = {
       val p = Point2d(i, j)
       val mag = pow(max) - pow(p.magnitude)
-      mag * p.normalize.y + getInfluence(i, j).x
+      Point2d(mag * p.normalize.y, -mag * p.normalize.x) + getInfluence(i, j)
     }
-    def ddy(i:Double, j:Double):Double = {
-      val p = Point2d(i, j)
-      val mag = pow(max) - pow(p.magnitude)
-      -mag * p.normalize.x + getInfluence(i, j).y
-    }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
+
+    new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
   def perlin(width:Int, height:Int, scale:Int) = {
@@ -123,13 +113,11 @@ object VectorField {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
       600 *: grad.rotate(3.1415/2)
     }
-    def ddx(i:Double, j:Double):Double = {
-      getInfluence(i, j).x
+    def dd(i:Double, j:Double):Point2d = {
+      getInfluence(i, j)
     }
-    def ddy(i:Double, j:Double):Double = {
-      getInfluence(i, j).y
-    }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
+
+    new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
   def perlinWind(solidElevation:Double, noise:Indexed2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
@@ -138,7 +126,8 @@ object VectorField {
       val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
       val factor =
         if (atPoint < solidElevation) {
-          atPoint/10
+          atPoint/4
+          atPoint/4
         } else {
           println(atPoint)
           atPoint
@@ -147,24 +136,15 @@ object VectorField {
     }
     def xx(i:Double) = 0.5 - i/width
     def yy(j:Double) = 0.5 - j/height
-    def ddx(i:Double, j:Double):Double = {
+    def dd(i:Double, j:Double):Point2d = {
       val x = xx(i)
       val y = yy(j)
       val p = Point2d(x, y)
       val mag = pow(0.3) - pow(p.magnitude)
-      val result = mag * p.normalize.y + getInfluence(i, j).x
-      //println("%.2f, %.2f" format (xx(0), yy(0)))
+      val result = Point2d(mag * p.normalize.y, -mag * p.normalize.x) + getInfluence(i, j)
       result*2
     }
-    def ddy(i:Double, j:Double):Double = {
-      val x = xx(i)
-      val y = yy(j)
-      val p = Point2d(x, y)
-      val mag = pow(0.3) - pow(p.magnitude)
-      val result = -mag * p.normalize.x + getInfluence(i, j).y
-      result*2
-    }
-    new VectorField(0, 0, width, height, scale, ddx, ddy)
+    new VectorField(0, 0, width, height, scale, dd)
   }
 
 
@@ -176,65 +156,26 @@ object VectorField {
     val noise = new PerlinNoise(1/32.0, 5, width, seed).lazyRender
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
-      600 *: grad.rotate(-3.1415/2)
+      grad.rotate(-3.1415/2).normalize * 20
+
     }
-    def ddx(i:Double, j:Double):Double = {
+    def dd(i:Double, j:Double):Point2d = {
       val p = Point2d(i, j)
       val mag = pow(max) - pow(p.magnitude)
-      mag * p.normalize.y + getInfluence(i, j).x
+      mag *: Point2d(p.normalize.y, -p.normalize.x) + getInfluence(i, j)
     }
-    def ddy(i:Double, j:Double):Double = {
-      val p = Point2d(i, j)
-      val mag = pow(max) - pow(p.magnitude)
-      -mag * p.normalize.x + getInfluence(i, j).y
-    }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
-  }
-
-  def perlinWindFix(width:Int, height:Int, scale:Int, seed:Long) = {
-    val max = Point2d(width, height).magnitude/(scale*2)
-
-    def pow(k:Double) = math.pow(k, 1.15)
-    val noise = new PerlinNoise(1/32.0, 5, width, seed).lazyRender
-    def getInfluence(i:Double, j:Double):Point2d = {
-        Point2d.Zero//gradient(noise, i.toInt + width/scale, j.toInt + height/scale).normalize.rotate(-3.1415/2)/10
-    }
-    def xx(i:Double) = i
-    def yy(j:Double) = j
-    def ddx(i:Double, j:Double):Double = {
-      val x = xx(i)
-      val y = yy(j)
-      val p = Point2d(x, y)
-      val mag = (pow(max) - pow(p.magnitude))
-
-      val res = mag * p.normalize.y + getInfluence(x, y).x
-      println(res)
-      res
-    }
-    def ddy(i:Double, j:Double):Double = {
-      val x = xx(i)
-      val y = yy(j)
-      val p = Point2d(x, y)
-      val mag = (pow(max) - pow(p.magnitude))
-      -mag * p.normalize.x + getInfluence(x, y).y
-    }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
+    new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
   def reverseSpiral(width:Int, height:Int, scale:Int) = {
-    def ddx(i:Double, j:Double):Double = {
+    def dd(i:Double, j:Double):Point2d = {
       val x = i
       val y = j
       val mag = math.pow(Point2d(x, y).magnitude, 1.25)
-      (y / mag)*scale
+      Point2d(y, -x)*(scale/mag)
+
     }
-    def ddy(i:Double, j:Double):Double = {
-      val x = i
-      val y = j
-      val mag = math.pow(Point2d(x, y).magnitude, 1.25)
-      (-x / mag)*scale
-    }
-    new VectorField(-width, -height, 2*width, 2*height, scale, ddx, ddy)
+    new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
   def magToColor(mag:Double):Color = {
@@ -244,7 +185,7 @@ object VectorField {
 
 }
 
-class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, ddx:(Double, Double) => Double, ddy:(Double, Double) => Double) {
+class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, dd:(Double, Double) => Point2d) {
   lazy val vectors = {
     for (i <- x/div until (x + width)/div;
          j <- y/div until (y + height)/div) yield {
@@ -252,10 +193,8 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, ddx:(Double, Dou
     }
   }
 
-  private def getArrow(i:Int, j:Int) = {
-    val x = ddx(i, j)
-    val y = ddy(i, j)
-    val v = Point2d(x, y)
+  private def getArrow(i:Double, j:Double) = {
+    val v = dd(i, j)
     val mag = v.magnitude.clamp(0.01,50)
     val color = VectorField.magToColor(mag)
     val d = v.normalize

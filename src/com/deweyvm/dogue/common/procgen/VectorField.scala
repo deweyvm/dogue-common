@@ -126,11 +126,9 @@ object VectorField {
       val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
       val factor =
         if (atPoint < solidElevation) {
-          atPoint/4
-          atPoint/4
+          math.abs(atPoint).clamp(0,0.02)
         } else {
-          println(atPoint)
-          atPoint
+          atPoint.clamp(0,0.12)
         }
       gradient(noise, i.toInt, j.toInt).normalize.rotate(3.1415)*factor
     }
@@ -141,7 +139,8 @@ object VectorField {
       val y = yy(j)
       val p = Point2d(x, y)
       val mag = pow(0.3) - pow(p.magnitude)
-      val result = Point2d(mag * p.normalize.y, -mag * p.normalize.x) + getInfluence(i, j)
+      val norm = p.normalize
+      val result = (mag *: Point2d(norm.y, -norm.x)) + getInfluence(i, j)
       result*2
     }
     new VectorField(0, 0, width, height, scale, dd)

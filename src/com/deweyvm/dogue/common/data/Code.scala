@@ -102,7 +102,7 @@ object Code {
   val Y          = Code( 89, 'Y', '\u0059')
   val Z          = Code( 90, 'Z', '\u005A')
   val `[`        = Code( 91, '[', '\u005B')
-  val backslash  = Code( 92, '\\', '\\')
+  val \          = Code( 92, '\\', '\\')
   val `]`        = Code( 93, ']', '\u005D')
   val ^          = Code( 94, '^', '\u005E')
   val underscore = Code( 95, '_', '\u005F')

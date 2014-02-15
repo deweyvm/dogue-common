@@ -5,7 +5,7 @@ import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import com.deweyvm.gleany.graphics.Color
 import scala.util.Random
-import com.deweyvm.dogue.common.data.{Lazy2d, Array2d, Indexed2d}
+import com.deweyvm.dogue.common.data.{Angles, Lazy2d, Array2d, Indexed2d}
 
 object VectorField {
   def simpleSpiral(width:Int, height:Int) = {
@@ -111,7 +111,7 @@ object VectorField {
     val noise = new PerlinNoise(1/32.0, 5, width, 0L).lazyRender
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
-      600 *: grad.rotate(3.1415/2)
+      600 *: grad.rotate(Angles.Tau/4)
     }
     def dd(i:Double, j:Double):Point2d = {
       getInfluence(i, j)
@@ -130,7 +130,7 @@ object VectorField {
         } else {
           atPoint.clamp(0,0.12)
         }
-      gradient(noise, i.toInt, j.toInt).normalize.rotate(3.1415)*factor
+      gradient(noise, i.toInt, j.toInt).normalize.rotate(Angles.Tau/2)*factor
     }
     def xx(i:Double) = 0.5 - i/width
     def yy(j:Double) = 0.5 - j/height
@@ -155,7 +155,7 @@ object VectorField {
     val noise = new PerlinNoise(1/32.0, 5, width, seed).lazyRender
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
-      grad.rotate(-3.1415/2).normalize * 20
+      grad.rotate(-Angles.Tau/4).normalize * 20
 
     }
     def dd(i:Double, j:Double):Point2d = {

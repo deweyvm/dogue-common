@@ -4,6 +4,7 @@ import com.deweyvm.gleany.data.Point2d
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import java.util.Objects
+import com.deweyvm.dogue.common.data.Angles
 
 object Line {
   def test() {
@@ -29,7 +30,7 @@ object Line {
       val p = new Line(Point2d.Zero,Point2d.UnitX)
       for (i <- 0 until 90) {
 
-        val angle = (i/90f)*3.141592
+        val angle = (i/90f)*(Angles.Tau/2)
 
         val q = new Line(Point2d.UnitX,Point2d.UnitX + Point2d.UnitX.rotate(angle))
         assert(( q crossZ p) >= 0)
@@ -42,7 +43,7 @@ object Line {
       val p = new Line(Point2d.Zero,Point2d.UnitX)
       for (i <- 0 until 90) {
 
-        val angle = (i/90f)*3.141592
+        val angle = (i/90f)*(Angles.Tau/2)
 
         val q = new Line(Point2d.UnitX,Point2d.UnitX + Point2d.UnitX.rotate(-angle))
         assert(( q crossZ p) <= 0)

@@ -3,7 +3,7 @@ package com.deweyvm.dogue.common.procgen
 import scala.collection.immutable.IndexedSeq
 import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
-import com.deweyvm.dogue.common.data.{Lazy2d, Indexed2d, Array2d}
+import com.deweyvm.dogue.common.data.{Angles, Lazy2d, Indexed2d, Array2d}
 import scala.math._
 
 object PerlinNoise {
@@ -28,11 +28,10 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
   def getPerm(i:Int) = {
     perm(i % perm.length)
   }
-  private val pi = 3.1415926535897932384626433
   private val dirs = {
     ((0 until whatDoesThisVariableMean) map { i =>
-      val x = scala.math.cos(i * 2 * pi/whatDoesThisVariableMean)
-      val y = scala.math.sin(i * 2 * pi/whatDoesThisVariableMean)
+      val x = scala.math.cos(i * Angles.Tau/whatDoesThisVariableMean)
+      val y = scala.math.sin(i * Angles.Tau/whatDoesThisVariableMean)
       (x, y)
     }).toVector
   }

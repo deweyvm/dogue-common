@@ -6,6 +6,7 @@ import com.deweyvm.gleany.data.{Point2d, Point2f}
 import scala.util.Random
 
 import scala.math.{sin,cos}
+import com.deweyvm.dogue.common.data.Angles
 
 class RandomQueue[T](seed:Long) {
   private val qSeed = seed
@@ -36,7 +37,6 @@ class RandomQueue[T](seed:Long) {
 
 class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Double, maxDist:Double, seed:Long) {
   private val random = new Random(seed)
-  private val Pi = 3.14159265358979
   private val numPoints = 100
   //private val minDist = 10.0
   private val cellSize = maxDist/scala.math.sqrt(2)
@@ -100,7 +100,7 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
     val r1 = random.nextDouble()
     val r2 = random.nextDouble()
     val radius = maxDist*(r1 + 1)
-    val angle = 2 * Pi * r2
+    val angle = Angles.Tau * r2
     val x = point.x + radius * cos(angle)
     val y = point.y + radius * sin(angle)
     val (lx, ly) = lock(x, y)

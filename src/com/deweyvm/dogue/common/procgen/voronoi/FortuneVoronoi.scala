@@ -18,7 +18,7 @@ class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
   }
   private val queue = mutable.PriorityQueue[VEvent]()
 
-  def getEdges:ArrayBuffer[VEdge] = {
+  def getEdges:Vector[VEdge] = {
     var root:VParabola = null
     queue.clear()
     for (i <- 0 until places.length) {
@@ -42,7 +42,7 @@ class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
       }
     }
 
-    edges
+    edges.filter{_ != null}.toVector
   }
 
   private def queueRemove(event:VEvent) {
@@ -284,7 +284,7 @@ class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
     val x:Double = (b.g-a.g) / (a.f - b.f)
     val y:Double = a.f * x + a.g
 
-    if (x.isNan()) {
+    if (x.isNaN) {
       return null
     }
     if(math.abs(x) + math.abs(y) > 20*width) {

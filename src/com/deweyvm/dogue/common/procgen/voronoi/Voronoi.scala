@@ -17,10 +17,11 @@ object Voronoi {
   type LineMap = Map[Line,Int]
 
   def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int):Vector[Edge] = {
-    val v = new FortuneVoronoi
+
     val buff = new ArrayBuffer[Point2d]()
     points foreach {buff += _}
-    v.GetEdges(buff, width, height).map {edge =>
+    val v = new FortuneVoronoi(width, height, buff)
+    v.getEdges.map {edge =>
       Edge(edge.left, edge.right, edge.start, edge.end)
     }.toVector
   }

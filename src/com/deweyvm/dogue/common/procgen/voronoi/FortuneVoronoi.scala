@@ -1,66 +1,41 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
-import com.deweyvm.gleany.data.{Rectd, Point3d, Point2f, Point2d}
+import com.deweyvm.gleany.data.Point2d
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
 import scala.math
-import com.deweyvm.dogue.common.procgen.{Polygon, Line}
-import scala.util.control.Breaks
 
 /**
  * credit to ivank
  */
-class FortuneVoronoi {
-  private var places:ArrayBuffer[Point2d] = null
-  private var edges:ArrayBuffer[VEdge] = null
-  implicit val ordering:Ordering[VEvent] = new Ordering[VEvent] {
+class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
+  private val edges = ArrayBuffer[VEdge]()
+  implicit val ordering = new Ordering[VEvent] {
     def compare(self:VEvent, other:VEvent):Int = {
       val b1:Boolean = self.y > other.y
       if (b1) 1 else -1
     }
   }
-  private val queue:mutable.PriorityQueue[VEvent] = mutable.PriorityQueue[VEvent]()
+  private val queue = mutable.PriorityQueue[VEvent]()
 
-  private var width:Int = 0
-  private var height:Int = 0
-
-  private var root:VParabola = null
-
-  private var ly:Double = 0// line y
-  private var lasty:Double = 0// last y
-
-  private var fp:Point2d = null// first point
-
-
-  def GetEdges(p:ArrayBuffer[Point2d], width:Int, height:Int):ArrayBuffer[VEdge] = {
-    root = null
-    this.places = p
-    this.edges = ArrayBuffer[VEdge]()
-    this.width = width
-    this.height = height
-
+  def getEdges:ArrayBuffer[VEdge] = {
+    var root:VParabola = null
     queue.clear()
     for (i <- 0 until places.length) {
       val ev:VEvent = new VEvent(places(i), true)
       queue.enqueue(ev)
     }
 
-    var lasty:Double = Double.MaxValue
-
     while(!queue.isEmpty) {
       val e = queue.dequeue()
-      ly = e.point.y
-      if(e.pe) {
-        InsertParabola(e.point)
+      val lineY = e.point.y
+      if(e.isPlaceEvent) {
+        root = insertParabola(e.point, root, lineY)
       } else {
-        RemoveParabola(e)
+        removeParabola(e, root, lineY)
       }
-
-      lasty = e.y
     }
-    FinishEdge(root)
+    finishEdge(root)
     for (i <- 0 until edges.length) {
       if(edges(i).neighbour != null) {
         edges(i).start = edges(i).neighbour.end
@@ -91,13 +66,11 @@ class FortuneVoronoi {
     }
   }
 
-  private def InsertParabola(p:Point2d) {
+  private def insertParabola(p:Point2d, root:VParabola, lineY:Double):VParabola = {
     if(root == null) {
-      root = new VParabola(p)
-      fp = p
-      return
+      return new VParabola(p)
     }
-
+    val fp:Point2d = null
     if (root.isLeaf && root.site.y - p.y < 1) {
       root.isLeaf = false
       root.setLeft(new VParabola(fp))
@@ -109,17 +82,17 @@ class FortuneVoronoi {
         root.edge = new VEdge(s, p, fp)
       }
       edges += root.edge
-      return
+      return root
     }
 
-    val par:VParabola = GetParabolaByX(p.x)
+    val par:VParabola = getParabolaByX(p.x, root, lineY)
 
     if(par.cEvent != null) {
       queueRemove(par.cEvent)
       par.cEvent = null
     }
 
-    val start:Point2d = Point2d(p.x, GetY(par.site, p.x))
+    val start:Point2d = Point2d(p.x, getY(par.site, p.x, lineY))
 
     val el:VEdge = new VEdge(start, par.site, p)
     val er:VEdge = new VEdge(start, p, par.site)
@@ -141,18 +114,19 @@ class FortuneVoronoi {
     par.getLeft.setLeft(p0)
     par.getLeft.setRight(p1)
 
-    CheckCircle(p0)
-    CheckCircle(p2)
+    checkCircle(p0, lineY)
+    checkCircle(p2, lineY)
+    root
   }
 
-  private def RemoveParabola(e:VEvent) {
+  private def removeParabola(e:VEvent, root:VParabola, lineY:Double) {
     val p1:VParabola = e.arch
 
-    val xl:VParabola = GetLeftParent(p1)
-    val xr:VParabola = GetRightParent(p1)
+    val xl:VParabola = getLeftParent(p1)
+    val xr:VParabola = getRightParent(p1)
 
-    val p0:VParabola = GetLeftChild(xl)
-    val p2:VParabola = GetRightChild(xr)
+    val p0:VParabola = getLeftChild(xl)
+    val p2:VParabola = getRightChild(xr)
 
     if(p0.cEvent != null){
       queueRemove(p0.cEvent)
@@ -163,9 +137,7 @@ class FortuneVoronoi {
       p2.cEvent = null
     }
 
-    val p:Point2d = Point2d(e.point.x, GetY(p1.site, e.point.x))
-
-    lasty = e.point.y
+    val p:Point2d = Point2d(e.point.x, getY(p1.site, e.point.x, lineY))
 
     xl.edge.end = p
     xr.edge.end = p
@@ -200,11 +172,12 @@ class FortuneVoronoi {
         gparent.setRight(p1.parent.getLeft)
       }
     }
-    CheckCircle(p0)
-    CheckCircle(p2)
+    checkCircle(p0, lineY)
+    checkCircle(p2, lineY)
+
   }
 
-  private def FinishEdge(n:VParabola) {
+  private def finishEdge(n:VParabola) {
     val mx =
       if(n.edge.direction.x > 0.0) {
         math.max(width, n.edge.start.x + 10)
@@ -214,29 +187,29 @@ class FortuneVoronoi {
     n.edge.end = Point2d(mx, n.edge.f*mx + n.edge.g)
 
     if(!n.getLeft.isLeaf) {
-      FinishEdge(n.getLeft)
+      finishEdge(n.getLeft)
     }
     if(!n.getRight.isLeaf) {
-      FinishEdge(n.getRight)
+      finishEdge(n.getRight)
     }
   }
 
-  private def GetXOfEdge(par:VParabola, y:Double):Double = {
-    val left:VParabola = GetLeftChild(par)
-    val right:VParabola = GetRightChild(par)
+  private def getXOfEdge(par:VParabola, y:Double):Double = {
+    val left:VParabola = getLeftChild(par)
+    val right:VParabola = getRightChild(par)
 
     val p:Point2d = left.site
     val r:Point2d = right.site
 
-    var dp:Double = 2*(p.y - y)
-    val a1:Double = 1/dp
-    val b1:Double = -2*p.x/dp
-    val c1:Double = y+dp/4 + p.x*p.x/dp
+    val dp1:Double = 2*(p.y - y)
+    val a1:Double = 1/dp1
+    val b1:Double = -2*p.x/dp1
+    val c1:Double = y+dp1/4 + p.x*p.x/dp1
 
-    dp = 2*(r.y - y)
-    val a2:Double = 1/dp
-    val b2:Double = -2*r.x/dp
-    val c2:Double = y+dp/4 + r.x*r.x/dp
+    val dp2 = 2*(r.y - y)
+    val a2:Double = 1/dp2
+    val b2:Double = -2*r.x/dp2
+    val c2:Double = y+dp2/4 + r.x*r.x/dp2
 
     val a:Double = a1 - a2
     val b:Double = b1 - b2
@@ -246,22 +219,19 @@ class FortuneVoronoi {
     val x1:Double = (-b + math.sqrt(disc)) / (2*a)
     val x2:Double = (-b - math.sqrt(disc)) / (2*a)
 
-    var ry:Double = 0
-    if(p.y < r.y ) {
-      ry =  math.max(x1, x2)
+    if (p.y < r.y) {
+      math.max(x1, x2)
     } else {
-      ry = math.min(x1, x2)
+      math.min(x1, x2)
     }
-
-    ry
   }
 
-  def GetParabolaByX(xx:Double):VParabola = {
+  private def getParabolaByX(xx:Double, root:VParabola, lineY:Double):VParabola = {
     var par:VParabola = root
     var x:Double = 0
 
     while(!par.isLeaf) {
-      x = GetXOfEdge(par, ly)
+      x = getXOfEdge(par, lineY)
       if(x > xx) {
         par = par.getLeft
       } else {
@@ -271,34 +241,34 @@ class FortuneVoronoi {
     par
   }
 
-  private def GetY(p:Point2d, x:Double) = {
-    val dp = 2*(p.y - ly)
+  private def getY(p:Point2d, x:Double, lineY:Double) = {
+    val dp = 2*(p.y - lineY)
     val b1 = -2*p.x/dp
-    val c1 = ly+dp/4 + p.x*p.x/dp
+    val c1 = lineY+dp/4 + p.x*p.x/dp
 
     x*x/dp + b1*x + c1
   }
 
 
-  private def CheckCircle(b:VParabola) {
-    val lp:VParabola = GetLeftParent(b)
-    val rp:VParabola = GetRightParent(b)
+  private def checkCircle(b:VParabola, lineY:Double) {
+    val lp:VParabola = getLeftParent(b)
+    val rp:VParabola = getRightParent(b)
 
-    val a:VParabola = GetLeftChild(lp)
-    val c:VParabola = GetRightChild(rp)
+    val a:VParabola = getLeftChild(lp)
+    val c:VParabola = getRightChild(rp)
 
     if(a == null || c == null || a.site == c.site) {
       return
     }
 
-    val s:Point2d = GetEdgeIntersection(lp.edge, rp.edge)
+    val s:Point2d = getEdgeIntersection(lp.edge, rp.edge)
     if(s == null) {
       return
     }
 
     val d:Double = (a.site - s).magnitude
 
-    if(s.y - d  >= ly) {
+    if(s.y - d  >= lineY) {
       return
     }
 
@@ -309,11 +279,14 @@ class FortuneVoronoi {
     queue.enqueue(e)
   }
 
-  private def GetEdgeIntersection(a:VEdge, b:VEdge):Point2d = {
+  private def getEdgeIntersection(a:VEdge, b:VEdge):Point2d = {
 
     val x:Double = (b.g-a.g) / (a.f - b.f)
     val y:Double = a.f * x + a.g
 
+    if (x.isNan()) {
+      return null
+    }
     if(math.abs(x) + math.abs(y) > 20*width) {
       return null
     } // parallel
@@ -339,16 +312,7 @@ class FortuneVoronoi {
     Point2d(x, y)
   }
 
-
-  /*private def GetLeft(n:VParabola):VParabola = {
-    GetLeftChild(GetLeftParent(n))
-  }
-
-  private def GetRight(n:VParabola):VParabola = {
-    GetRightChild(GetRightParent(n))
-  }*/
-
-  private def GetLeftParent(n:VParabola):VParabola = {
+  private def getLeftParent(n:VParabola):VParabola = {
     var par:VParabola = n.parent
     var pLast:VParabola = n
     while(par.getLeft == pLast) {
@@ -361,7 +325,7 @@ class FortuneVoronoi {
     par
   }
 
-  private def GetRightParent(n:VParabola):VParabola = {
+  private def getRightParent(n:VParabola):VParabola = {
     var par:VParabola = n.parent
     var pLast:VParabola = n
     while(par.getRight == pLast) {
@@ -374,7 +338,7 @@ class FortuneVoronoi {
     par
   }
 
-  private def GetLeftChild(n:VParabola):VParabola = {
+  private def getLeftChild(n:VParabola):VParabola = {
     if(n == null) {
       return null
     }
@@ -385,7 +349,7 @@ class FortuneVoronoi {
     par
   }
 
-  private def GetRightChild(n:VParabola):VParabola = {
+  private def getRightChild(n:VParabola):VParabola = {
     if(n == null) {
       return null
     }

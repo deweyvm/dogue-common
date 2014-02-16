@@ -104,7 +104,8 @@ class PoissonRng(val width:Double, val height:Double, minDist:(Int, Int) => Doub
     val x = point.x + radius * cos(angle)
     val y = point.y + radius * sin(angle)
     val (lx, ly) = lock(x, y)
-    Point2d(lx, ly)
+    Point2d(x, y)
+
   }
 
   private def lock(x:Double, y:Double) = {

@@ -1,11 +1,13 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
 import com.deweyvm.dogue.common.procgen.{Polygon, Line}
-import com.deweyvm.gleany.data.{Rectd, Point2d}
+import com.deweyvm.gleany.data.{Recti, Rectd, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
+import scala.util.Random
+
 object Voronoi {
   val debugPrint = false
   def debug(s:String) = {
@@ -16,14 +18,55 @@ object Voronoi {
 
   type LineMap = Map[Line,Int]
 
-  def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int):Vector[Edge] = {
 
-    val buff = new ArrayBuffer[Point2d]()
-    points foreach {buff += _}
-    val v = new FortuneVoronoi(width, height, buff)
-    v.getEdges.map {edge =>
-      Edge(edge.left, edge.right, edge.start, edge.end)
-    }.toVector
+  def check(rect:Recti, edges:Vector[Edge]):Option[Vector[Edge]] = {
+    var intersections = 0
+    edges foreach { e1 =>
+      edges foreach { e2 =>
+        val l1 = e1.toLine
+        val l2 = e2.toLine
+        val intersect = l1.intersectPoint(l2)
+        intersect.map { pt =>
+          if (rect.contains(pt) &&
+            l1.getAdjacentEpsilon(pt, 0.01).isEmpty &&
+            l2.getAdjacentEpsilon(pt, 0.01).isEmpty) {
+            intersections += 1
+          }
+        }
+      }
+    }
+    if (intersections > 0) {
+      None
+    } else {
+      edges.some
+    }
+  }
+
+  def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int, seed:Long):Vector[Edge] = {
+    val r = new Random(seed)
+    var nudgeAmount = 0.5
+    def nudge = (r.nextDouble() - 0.5)*nudgeAmount
+    var myPoints = points
+    var count = 0
+    while (true) {
+      val v = new FortuneVoronoi(width, height, myPoints)
+      val result = v.getEdges.map {edge =>
+        Edge(edge.left, edge.right, edge.start, edge.end)
+      }.toVector
+
+      check(Recti(0,0,width, height), result) match {
+        case Some(edges) =>
+          return edges
+        case None =>
+          println("nudging " + count)
+          count += 1
+          nudgeAmount *= 2
+          myPoints = myPoints map { pt =>
+            pt + Point2d(nudge, nudge)
+          }
+      }
+    }
+    return Vector()//dummy, impossible
   }
 
   def getNext(lines:Vector[Line], line:Line, pt:Point2d, sign:Int):Option[(Line, Point2d)] = {

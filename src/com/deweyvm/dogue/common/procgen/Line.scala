@@ -56,7 +56,7 @@ object Line {
 
   def intersectTest() {
     def assertRes(l1:Line, l2:Line, expected:Option[Point2d]) {
-      val result = l1 intersectPoint l2
+      val result = l1 intersectPointEnd l2
       assert(result == expected, "expected(%s) != %s" format (expected, result))
       ()
     }
@@ -77,6 +77,33 @@ object Line {
 case class Line(p:Point2d, q:Point2d) {
   def this(x1:Double, y1:Double, x2:Double, y2:Double) = this(Point2d(x1, y1), Point2d(x2, y2))
 
+  lazy val length = (q - p).magnitude
+
+  /**
+   * returns point if lines are touching only at endpoints or intersecting
+   * @param other
+   * @return
+   */
+  def intersectPointEnd(other:Line):Option[Point2d] = {
+    val s10_x = q.x - p.x
+    val s10_y = q.y - p.y
+    val s32_x = other.q.x - other.p.x
+    val s32_y = other.q.y - other.p.y
+
+    val denom = s10_x * s32_y - s32_x * s10_y
+    if (denom == 0) {
+      return None // Collinear
+    }
+    if (other.getAdjacent(p).isDefined) {
+      p.some
+    } else if (other.getAdjacent(q).isDefined) {
+      q.some
+    } else {
+      intersectPoint(other)
+    }
+  }
+
+
   //http://stackoverflow.com/a/14795484/892213
   def intersectPoint(other:Line):Option[Point2d] = {
 
@@ -89,11 +116,6 @@ case class Line(p:Point2d, q:Point2d) {
     if (denom == 0)
       return None // Collinear
 
-    if (other.getAdjacent(p).isDefined) {
-      return p.some
-    } else if (other.getAdjacent(q).isDefined) {
-      return q.some
-    }
     val denomPositive = denom > 0
 
     val s02_x = p.x - other.p.x
@@ -139,6 +161,16 @@ case class Line(p:Point2d, q:Point2d) {
     if (pt == p) {
       this.some
     } else if (pt == q) {
+      Line(q,p).some
+    } else {
+      None
+    }
+  }
+
+  def getAdjacentEpsilon(pt:Point2d, epsilon:Double):Option[Line] = {
+    if ((pt - p).magnitude2 < epsilon) {
+      this.some
+    } else if ((pt - q).magnitude2 < epsilon) {
       Line(q,p).some
     } else {
       None

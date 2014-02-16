@@ -8,7 +8,8 @@ import scala.math
 /**
  * credit to ivank
  */
-class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
+class FortuneVoronoi(width:Int, height:Int, places:IndexedSeq[Point2d]) {
+
   private val edges = ArrayBuffer[VEdge]()
   implicit val ordering = new Ordering[VEvent] {
     def compare(self:VEvent, other:VEvent):Int = {
@@ -17,6 +18,7 @@ class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
     }
   }
   private val queue = mutable.PriorityQueue[VEvent]()
+  var fp:Point2d = null
 
   def getEdges:Vector[VEdge] = {
     var root:VParabola = null
@@ -46,32 +48,18 @@ class FortuneVoronoi(width:Int, height:Int, places:ArrayBuffer[Point2d]) {
   }
 
   private def queueRemove(event:VEvent) {
-    val toAdd = ArrayBuffer[VEvent]()
-    var flag = true
-    while (flag) {
-      if (queue.isEmpty) {
-        flag = false
-        queue.enqueue(toAdd:_*)
-      } else {
-        val next = queue.dequeue()
-
-        if (next == event) {
-          queue.enqueue(toAdd:_*)
-          flag = false
-        } else {
-          toAdd += next
-        }
-      }
-
-    }
+    val all = queue.dequeueAll filter {_ != event }
+    queue.clear()
+    queue.enqueue(all:_*)
   }
 
   private def insertParabola(p:Point2d, root:VParabola, lineY:Double):VParabola = {
     if(root == null) {
+      fp = p
       return new VParabola(p)
     }
-    val fp:Point2d = null
-    if (root.isLeaf && root.site.y - p.y < 1) {
+
+    if (root.isLeaf && root.site.y - p.y < 0) {
       root.isLeaf = false
       root.setLeft(new VParabola(fp))
       root.setRight(new VParabola(p))

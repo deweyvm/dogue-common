@@ -19,7 +19,7 @@ object Voronoi {
   type LineMap = Map[Line,Int]
 
 
-  def check(rect:Recti, edges:Vector[Edge]):Option[Vector[Edge]] = {
+  def check(rect:Rectd, edges:Vector[Edge]):Option[Vector[Edge]] = {
     var intersections = 0
     edges foreach { e1 =>
       edges foreach { e2 =>
@@ -42,7 +42,7 @@ object Voronoi {
     }
   }
 
-  def getEdges(points:IndexedSeq[Point2d], width:Int, height:Int, seed:Long):Vector[Edge] = {
+  def getEdges(points:IndexedSeq[Point2d], width:Double, height:Double, seed:Long):Vector[Edge] = {
     val r = new Random(seed)
     var nudgeAmount = 0.5
     def nudge = (r.nextDouble() - 0.5)*nudgeAmount
@@ -54,7 +54,7 @@ object Voronoi {
         Edge(edge.left, edge.right, edge.start, edge.end)
       }.toVector
 
-      check(Recti(0,0,width, height), result) match {
+      check(Rectd(0,0,width, height), result) match {
         case Some(edges) =>
           return edges
         case None =>
@@ -144,7 +144,7 @@ object Voronoi {
           (newSet, None)
         } else {
           debug("~~~~~~~~~~ACCEPT~~~~~~~~~")
-          (newSet, Polygon(currentPoly.toVector).some)
+          (newSet, Polygon(currentPoly.toSet).some)
         }
 
       }

@@ -193,8 +193,11 @@ case class Line(p:Point2d, q:Point2d) {
     val const = 71
     List(p.x, p.y, q.x, q.y).foldLeft(const) {case (acc:Int, i:Double) => acc*const + toD(i)}
 
-}
+  }
 
+  def scale(s:Double) = {
+    copy(p = p*s, q = q*s)
+  }
 
   override def toString = "<%.2f,%.2f --- %.2f,%.2f>" format (p.x, p.y, q.x, q.y)
 }

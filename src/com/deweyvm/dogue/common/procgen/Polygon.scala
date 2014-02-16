@@ -7,17 +7,17 @@ import Implicits._
 object Polygon {
   def fromPoints(points:Vector[Point2d]):Polygon = {
     val toPair = points(points.length - 1) +: points
-    val lines = ((0 until toPair.length - 1) map { i =>
+    val lines = (0 until toPair.length - 1).map { i =>
       val p1 = toPair(i)
       val p2 = toPair(i+1)
       Line(p1, p2)
-    }).toVector
-    Polygon(lines)
+    }
+    Polygon(lines.toSet)
   }
 
 
   def test() {
-    val poly = Polygon(Vector(
+    val poly = Polygon(Set(
       new Line(1,1,3,2),
       new Line(3,2,4,1),
       new Line(4,1,6,4),
@@ -54,8 +54,11 @@ object Polygon {
 
 }
 
-case class Polygon(lines:Vector[Line]) {
-  lazy val set: Set[Line] = Set(lines:_*)
+case class Polygon(lines:Set[Line]) {
+
+  def isAdjacent(other:Polygon):Boolean = {
+    lines exists other.lines.contains
+  }
 
   def contains(pt:Point2d):Boolean = {
     val ray = new Line(pt, Point2d(Int.MaxValue, 5000))
@@ -70,14 +73,18 @@ case class Polygon(lines:Vector[Line]) {
 
   }
 
+  def scale(s:Double) = {
+    copy(lines = lines map {_.scale(s)})
+  }
+
   override def equals(obj:Any) = {
     if (!obj.isInstanceOf[Polygon]) {
       false
     } else {
       val other = obj.asInstanceOf[Polygon]
-      other.set == set
+      other.lines == lines
     }
   }
 
-  override def hashCode() = set.hashCode()
+  override def hashCode() = lines.hashCode()
 }

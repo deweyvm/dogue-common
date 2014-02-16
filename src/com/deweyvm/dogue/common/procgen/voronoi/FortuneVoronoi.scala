@@ -8,7 +8,7 @@ import scala.math
 /**
  * credit to ivank
  */
-class FortuneVoronoi(width:Int, height:Int, places:IndexedSeq[Point2d]) {
+class FortuneVoronoi(width:Double, height:Double, places:IndexedSeq[Point2d]) {
 
   private val edges = ArrayBuffer[VEdge]()
   implicit val ordering = new Ordering[VEvent] {

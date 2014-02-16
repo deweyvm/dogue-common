@@ -10,7 +10,7 @@ import com.deweyvm.dogue.common.procgen.voronoi.Edge
 
 
 object PolygonUtils {
-  private def lineToPixels(p1:Point2i, p2:Point2i):Vector[Point2i] = {
+  def lineToPixels(p1:Point2i, p2:Point2i):Vector[Point2i] = {
     import scala.math._
     val x1 = p1.x
     val y1 = p1.y

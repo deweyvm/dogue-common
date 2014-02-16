@@ -49,7 +49,37 @@ class MapName(seed:Long) {
     }
   }
 
-  def makeName = (getPrefix + getInfix + getSuffix).capitalize
+  case object PlaceSuffix extends Letter {
+    val suffices = Vector("a", "ia", "oa", "atol", "edow", "nia", "tia")
+    def getLetter = suffices.get
+  }
+
+
+  trait Segment {
+    def getTypes:Vector[Seq[Letter]]
+    def choose: String = getTypes.get.map{_.getLetter}.mkString
+  }
+
+  case object Prefix extends Segment {
+    def getTypes = Vector(List(Vowel, Consonant),
+                          List(Vowel, Vowel),
+                          List(Consonant, Vowel),
+                          List(Vowel, Consonant, Vowel))
+  }
+
+  case object Infix extends Segment {
+    def getTypes = Vector(List(Consonant, Vowel, PreConsonant, Consonant))
+  }
+
+  case object Suffix extends Segment {
+    def getTypes = Vector(List(PlaceSuffix))
+  }
+  def makeName = {
+    val name = List(Prefix, Infix, Suffix)
+    name.map{_.choose}.mkString.capitalize
+
+    //.map{ r => r.getTypes.get }.map{_.getLetter}.mkString
+  }//(getPrefix + getInfix + getSuffix).capitalize
 
   private def getPrefix = {
     val types = Vector(List(Vowel, Consonant),

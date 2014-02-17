@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
-import com.deweyvm.dogue.common.procgen.{Polygon, Line}
+import com.deweyvm.dogue.common.procgen.{Graph, Node, Polygon, Line}
 import com.deweyvm.gleany.data.{Recti, Rectd, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
@@ -153,16 +153,48 @@ object Voronoi {
     }
   }
 
-  def getFaces(edges:Vector[Edge], rect:Rectd):Vector[Polygon] = {
+  type GraphMap = Map[Line, Set[Polygon]]
+
+  def getGraph(edges:Vector[Edge], rect:Rectd):VoronoiGraph = {
     val lines = edges map { _.toLine }
     val startMap = Map[Line,Int]().withDefaultValue(0)
-    val faces = lines.foldLeft((Vector[Polygon](), startMap)) { case ((polys, set), line) =>
+    val graphMap = Map[Line, Set[Polygon]]().withDefaultValue(Set())
+    def addOpt(l:Line, graph:GraphMap, opts:Set[Polygon]):GraphMap = {
+      opts.foldLeft(graph){ case (g, p) =>
+        val s = g(l)
+        g + ((l, s + p))
+      }
+    }
+    val faces = lines.foldLeft((Vector[Polygon](), startMap, graphMap)) { case ((polys, set, graph), line) =>
       val (s1, ccw) = followCircular(set, lines, line, -1, rect)
       val (s2, cw) = followCircular(s1, lines, line, 1, rect)
-      (polys ++ ccw ++ cw, s2)
+      println(cw)
+      println(ccw)
+      val newGraph = addOpt(line, graph, Set(cw, ccw).flatten)
+      (polys ++ ccw ++ cw, s2, newGraph)
     }
-
-    val result = Set(faces._1:_*).toVector
-    result
+    VoronoiGraph(faces._1, faces._3)
   }
+}
+
+case class VoronoiGraph(polys:Vector[Polygon], private val lines:Map[Line, Set[Polygon]]) extends Graph[Polygon, Set] {
+  private val ns: Set[Node[Polygon, Set]] = Set(polys:_*).map { p =>
+    val neighbors: Set[Polygon] = p.lines.map { l =>
+      val k = lines(l)
+      if (k.size > 2) {
+        throw new RuntimeException
+      } else {
+        k.size.println()
+      }
+      k
+    }.flatten
+    new Node[Polygon, Set] {
+      def self = p
+      def getNeighbors = neighbors
+      def isNeighbor(o:Polygon) = neighbors contains o
+    }
+  }
+
+  def nodes = ns
+
 }

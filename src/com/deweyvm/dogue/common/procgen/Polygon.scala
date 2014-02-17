@@ -12,12 +12,12 @@ object Polygon {
       val p2 = toPair(i+1)
       Line(p1, p2)
     }
-    Polygon(lines.toSet)
+    Polygon(lines.toVector)
   }
 
 
   def test() {
-    val poly = Polygon(Set(
+    val poly = Polygon(Vector(
       new Line(1,1,3,2),
       new Line(3,2,4,1),
       new Line(4,1,6,4),
@@ -54,7 +54,7 @@ object Polygon {
 
 }
 
-case class Polygon(lines:Set[Line]) {
+case class Polygon(lines:Vector[Line]) {
 
   def isAdjacent(other:Polygon):Boolean = {
     lines exists other.lines.contains

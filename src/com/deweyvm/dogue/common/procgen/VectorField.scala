@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.procgen
 
-import com.deweyvm.gleany.data.{Point2i, Point2d}
+import com.deweyvm.gleany.data.{Time, Point2i, Point2d}
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import com.deweyvm.gleany.graphics.Color
@@ -19,13 +19,18 @@ object VectorField {
   }
 
   def test() {
-    def takeGradient(ones:Vector[(Int,Int)]) = gradient(Array2d.tabulate(3,3) {case (i, j)  =>
-      if (ones.contains((i, j))) {
-        1
-      } else {
-        0
-      }
-    }, 1, 1)
+    def takeGradient(ones:Vector[(Int,Int)]) = {
+      gradient(Array2d.tabulate(3,3) {case (i, j)  =>
+        if (ones.contains((i, j))) {
+          1
+        } else {
+          0
+        }
+      }, 1, 1)
+    }
+
+
+
 
     val tests = List(
       (Vector((1,1)), Point2d(0,0)),
@@ -66,7 +71,6 @@ object VectorField {
     val c20:Double = grid.get(2,0).getOrElse(c11)
     val c21:Double = grid.get(2,1).getOrElse(c11)
     val c22:Double = grid.get(2,2).getOrElse(c11)
-
     val v00 = (c11 - c00) *: (p(1,1) - p(0,0))
     val v01 = (c11 - c01) *: (p(1,1) - p(0,1))
     val v02 = (c11 - c02) *: (p(1,1) - p(0,2))
@@ -79,6 +83,7 @@ object VectorField {
     (v00 + v01 + v02 + v10 /*+ v11*/ + v12 + v20 + v21 + v22)/8
 
   }
+
 
   def windSpiral(width:Int, height:Int, scale:Int) = {
     val r = new Random(0)
@@ -140,7 +145,8 @@ object VectorField {
       val p = Point2d(x, y)
       val mag = pow(0.3) - pow(p.magnitude)
       val norm = p.normalize
-      val result = (mag *: Point2d(norm.y, -norm.x)) + getInfluence(i, j)
+      val influence = getInfluence(i, j)
+      val result = (mag *: Point2d(norm.y, -norm.x)) + influence
       result*2
     }
     new VectorField(0, 0, width, height, scale, dd)

@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
-import com.deweyvm.dogue.common.procgen.{Polygon, Line}
+import com.deweyvm.dogue.common.procgen.{Graph, Node, Polygon, Line}
 import com.deweyvm.gleany.data.{Recti, Rectd, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
@@ -162,7 +162,8 @@ object Voronoi {
       (polys ++ ccw ++ cw, s2)
     }
 
-    val result = Set(faces._1:_*).toVector
-    result
+    Set(faces._1:_*).toVector
   }
 }
+
+

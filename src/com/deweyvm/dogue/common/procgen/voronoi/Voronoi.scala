@@ -21,6 +21,7 @@ object Voronoi {
 
   def check(rect:Rectd, edges:Vector[Edge]):Option[Vector[Edge]] = {
     var intersections = 0
+    val epsilon = 0.0001
     edges foreach { e1 =>
       edges foreach { e2 =>
         val l1 = e1.toLine
@@ -28,8 +29,8 @@ object Voronoi {
         val intersect = l1.intersectPoint(l2)
         intersect.map { pt =>
           if (rect.contains(pt) &&
-            l1.getAdjacentEpsilon(pt, 0.01).isEmpty &&
-            l2.getAdjacentEpsilon(pt, 0.01).isEmpty) {
+            l1.getAdjacentEpsilon(pt, epsilon).isEmpty &&
+            l2.getAdjacentEpsilon(pt, epsilon).isEmpty) {
             intersections += 1
           }
         }

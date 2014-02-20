@@ -5,8 +5,6 @@ import scala.language.implicitConversions
 import com.deweyvm.dogue.common.data._
 import com.deweyvm.dogue.common.io.{EnrichedInputStream, EnrichedOutputStream, EnrichedSocket}
 import java.io.{OutputStream, InputStream}
-import scala.language.experimental.macros
-
 
 package object common {
   def id[T](x:T) = x
@@ -23,6 +21,8 @@ package object common {
       new EnrichedIndexedSeq[A](seq)
     implicit def any2Unit[A](a:A) = new EnrichedUnit(a)
     implicit def any2Printable[A](a:A) = new Printable[A](a)
+    implicit def bool2Select[A](b:Boolean) = new Select(b)
+    implicit def valToScalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
   }
 
   object Functions {

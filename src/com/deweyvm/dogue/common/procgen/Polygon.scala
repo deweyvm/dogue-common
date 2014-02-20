@@ -56,6 +56,13 @@ object Polygon {
 
 case class Polygon(lines:Vector[Line]) {
 
+  def upperLeft:Option[Point2d] = {
+    val p1 = lines.map {l => Vector(l.p, l.q)}
+    val points:Vector[Point2d] = p1.flatten
+
+    points.sortBy(_.x).sortBy(_.y).headOption
+  }
+
   def isAdjacent(other:Polygon):Boolean = {
     lines exists other.lines.contains
   }

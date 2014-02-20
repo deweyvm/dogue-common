@@ -10,6 +10,15 @@ import com.deweyvm.dogue.common.procgen.voronoi.Edge
 
 
 object PolygonUtils {
+
+
+  def flattenVector(pts:Vector[Point2d]):Array[Float] = {
+    val flat = pts.foldRight(Vector[Float]()){ case (p, acc) =>
+      p.x.toFloat +: (p.y.toFloat +: acc)
+    }
+    Array(flat:_*)
+  }
+
   def lineToPixels(p1:Point2i, p2:Point2i):Vector[Point2i] = {
     import scala.math._
     val x1 = p1.x

@@ -20,7 +20,7 @@ object TestManager {
     tests map {case (f, n) => new Test {
       def runTests(): Unit = f()
       def name = n
-    }} map { test =>
+    }} foreach { test =>
       val result = test.run()
       printResult(result, test.name)
       result match {

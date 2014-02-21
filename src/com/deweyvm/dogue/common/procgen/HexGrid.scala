@@ -95,7 +95,7 @@ object HexGrid {
       assert(polyOpt.isDefined, "poly %d undefined" format polyNumber)
       polyOpt foreach {poly =>
         val actualN = hex.graph.getNode(poly).map {_.getNeighbors.length}.getOrElse(-1)
-        assert(actualN == numNeighbors, "Neighbors: got (%d) expected (%d)" format (actualN, numNeighbors))
+        assert(actualN == numNeighbors, "Neighbors for %d: got (%d) expected (%d)" format (polyNumber, actualN, numNeighbors))
       }
     }
   }

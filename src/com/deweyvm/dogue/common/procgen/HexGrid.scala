@@ -173,7 +173,6 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     val k = Hex.coordsToIndex(x, y, hexCols)
     if (k < polys.length && k >= 0) {
       val p = polys(k)
-      println(k)
       p.map{_ +: Hex.getNeighbors(x, y, polys, hexCols)}.getOrElse(Vector())
     } else {
       Vector()

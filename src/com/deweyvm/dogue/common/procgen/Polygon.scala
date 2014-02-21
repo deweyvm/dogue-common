@@ -5,6 +5,7 @@ import com.deweyvm.dogue.common.Implicits
 import Implicits._
 
 object Polygon {
+  private var count = BigInt(0)
   def fromPoints(points:Vector[Point2d]):Polygon = {
     val toPair = points(points.length - 1) +: points
     val lines = (0 until toPair.length - 1).map { i =>
@@ -55,7 +56,8 @@ object Polygon {
 }
 
 case class Polygon(lines:Vector[Line]) {
-  lazy val hash = lines.hashCode()
+  val code = Polygon.count
+  Polygon.count += 1
   //fixme issue #211
   lazy val points:Vector[Point2d] = {
     val pts = lines map {_.p}
@@ -122,9 +124,9 @@ case class Polygon(lines:Vector[Line]) {
       false
     } else {
       val other = obj.asInstanceOf[Polygon]
-      other.lines == lines
+      other.code == code
     }
   }
 
-  override def hashCode() = hash
+  override def hashCode() = code.toInt
 }

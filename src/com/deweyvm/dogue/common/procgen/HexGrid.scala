@@ -2,9 +2,10 @@ package com.deweyvm.dogue.common.procgen
 
 import scala.util.Random
 import com.deweyvm.dogue.common.data.Array2d
-import com.deweyvm.gleany.data.Point2d
+import com.deweyvm.gleany.data.{Timer, Point2d}
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
+import scala.collection.immutable.IndexedSeq
 
 object Hex {
   case object Up extends HexDirection {
@@ -104,8 +105,6 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
   import Hex._
   val hexCols = cols - 1
   val hexRows = (rows - 1)/2
-  private var debug = false
-  private def output(s:String) = if (debug) println(s)
   private def makeHexes = {
     val factor = math.sqrt(3)/8
     val r = new Random(seed)
@@ -144,21 +143,21 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
 
   private def makeGraph:Graph[Polygon, Vector] = {
     val nodes:Map[Polygon, Node[Polygon, Vector]] = {
-      val ns = for (i <- 0 until hexCols*hexRows) yield {
-        val current:Option[Polygon] = polys(i)
-        current map { center =>
+      val ns = polys.zipWithIndex.map { case (current, i) =>
+        current.map { center =>
           val (x, y) = indexToCoords(i, hexCols)
-          val neighbors = Hex.getNeighbors(x, y, polys, hexCols)
-          val nSet = Set(neighbors:_*)
+          //val neighbors =
           val node = new Node[Polygon, Vector]{
-            def getNeighbors: Vector[Polygon] = neighbors
+            lazy val n = Hex.getNeighbors(x, y, polys, hexCols)
+            lazy val nSet = Set(n:_*)
+            def getNeighbors: Vector[Polygon] = n//eighbors
             def isNeighbor(t: Polygon): Boolean = nSet.contains(t)
             def self: Polygon = center
           }
           (center, node)
         }
       }
-      ns.toVector.flatten.toMap
+      ns.flatten.toMap
     }
     Graph.createVec(nodes)
   }
@@ -187,7 +186,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     pointToPolys(px, py) find {_.contains(Point2d(px, py))}
   }
 
-  val hexes = makeHexes
-  val polys = makePolys
-  val graph = makeGraph
+  val hexes = Timer.printMillisString("hex array    ", () => makeHexes)
+  val polys = Timer.printMillisString("polyfication ", () => makePolys)
+  val graph = Timer.printMillisString("grapher      ", () => makeGraph)
 }

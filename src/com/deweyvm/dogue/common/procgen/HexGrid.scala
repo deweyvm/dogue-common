@@ -2,31 +2,86 @@ package com.deweyvm.dogue.common.procgen
 
 import scala.util.Random
 import com.deweyvm.dogue.common.data.Array2d
-import com.deweyvm.gleany.data.Point2d
+import com.deweyvm.gleany.data.{Point2i, Point2d}
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
-class HexGrid(hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Long) {
+
+object Hex {
+  case object Up extends HexDirection {
+    def getOffset(i:Int) = (0, -1)
+  }
+  case object Down extends HexDirection {
+    def getOffset(i:Int) = (0, 1)
+  }
+  case object UpRight extends HexDirection {
+    def getOffset(i:Int) = (1, getStutter(i))
+  }
+  case object DownRight extends HexDirection {
+    def getOffset(i:Int) = (1, 1 + getStutter(i))
+  }
+  case object UpLeft extends HexDirection {
+    def getOffset(i:Int) = (-1, getStutter(i))
+  }
+  case object DownLeft extends HexDirection {
+    def getOffset(i:Int) = (-1, 1 + getStutter(i))
+  }
+
+  def getAll = Vector(Up, Down, UpRight, DownRight, UpLeft, DownLeft)
+
+  def indexToCoords(i:Int, hexCols:Int) = {
+    (i % hexCols, i / hexCols)
+  }
+
+  def coordsToIndex(i:Int, j:Int, hexCols:Int) = {
+    i + j*hexCols
+  }
+
+  def getNeighborOffsets(i:Int): Vector[(Int, Int)] = {
+    getAll map { _.getOffset(i) }
+  }
+
+  def getNeighbors(i:Int, j:Int, polys:Vector[Option[Polygon]], hexCols:Int):Vector[Polygon] = {
+    val (x, y) = indexToCoords(i, hexCols)
+    def getPoly(offset:(Int,Int)):Option[Polygon] = {
+      val (iOffset, jOffset) = offset
+      val k = coordsToIndex(x + iOffset, y + jOffset, hexCols)
+      if (k < 0 || k > polys.length - 1 || x + iOffset > hexCols - 1 || x + iOffset < 0) {
+        None
+      } else {
+        polys(k)
+      }
+    }
+
+    getNeighborOffsets(x).map(getPoly).flatten
+  }
+}
+
+trait HexDirection {
+  protected def getStutter(i:Int) = i.isOdd select (0, -1)
+  def getOffset(i:Int):(Int, Int)
+  def getCoords(iBase:Int, jBase:Int):(Int, Int) = {
+    val (io, jo) = getOffset(iBase)
+    (iBase + io, jBase + jo)
+  }
+}
+
+class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Long) {
+  import Hex._
   val hexCols = cols - 1
   val hexRows = (rows - 1)/2
   var debug = false
-  def output(s:String) = if(debug) println(s)
+  def output(s:String) = if (debug) println(s)
   def makeHexes = {
-    val factor = math.sqrt(3)/6
+    val factor = math.sqrt(3)/8
     val r = new Random(seed)
     def rd = (r.nextDouble() - 0.5)*distortion
     Array2d.tabulate(cols, rows) { case (i, j) =>
       val sign = (i.isOdd == j.isOdd).select(1, -1)
-      hexSize *: Point2d(i*1.5 + sign*factor, j) + rd.dup
+      hexSize *: Point2d(i*1 + sign*factor, j*(2/3.0)) + rd.dup
     }
   }
 
-  def indexToCoords(i:Int) = {
-    (i % hexCols, i / hexCols)
-  }
 
-  def coordsToIndex(i:Int, j:Int) = {
-    i + j*hexCols
-  }
 
   /**
    * must keep Option here so we can conveniently get adjacent hexes later
@@ -52,39 +107,21 @@ class HexGrid(hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Long) 
     polys.toVector
   }
 
-  private def pop(s:String, opt:Option[Polygon]):Option[Polygon] = {
-    opt match {
-      case Some(_) => ()
-        output(s + " occupied")
-      case None => ()
-        output(s + " vacant")
-    }
-    opt
-  }
-
   def makeGraph:Graph[Polygon, Vector] = {
     val nodes_ :Vector[Node[Polygon, Vector]] = {
       val ns = for (i <- 0 until hexCols*hexRows) yield {
         val current:Option[Polygon] = polys(i)
         current map { center =>
-          val (x, y) = indexToCoords(i)
-          def getPoly(xOffset:Int, yOffset:Int):Option[Polygon] = {
-            val k = coordsToIndex(x + xOffset, y + yOffset)
-            if (k < 0 || k > polys.length - 1 || x + xOffset > hexCols - 1 || x + xOffset < 0) {
+          val (x, y) = indexToCoords(i, hexCols)
+          def getPoly(iOffset:Int, jOffset:Int):Option[Polygon] = {
+            val k = coordsToIndex(x + iOffset, y + jOffset, hexCols)
+            if (k < 0 || k > polys.length - 1 || x + iOffset > hexCols - 1 || x + iOffset < 0) {
               None
             } else {
               polys(k)
             }
           }
-          //println("Node " + i)
-          val yOffset = x.isOdd select (0, -1)
-          val UL = pop("Upper Left ", getPoly(-1,  0 + yOffset))
-          val Up = pop("Upper      ", getPoly( 0, -1))
-          val UR = pop("Upper Right", getPoly( 1,  0 + yOffset))
-          val LL = pop("Lower Left ", getPoly(-1,  1 + yOffset))
-          val Lo = pop("Lower      ", getPoly( 0,  1))
-          val LR = pop("Lower Right", getPoly( 1,  1 + yOffset))
-          val neighbors = Vector(UL, Up, UR, LL, Lo, LR).flatten
+          val neighbors = Hex.getNeighborOffsets(x).map{ case (i, j) => getPoly(i, j)}.flatten
           val nSet = Set(neighbors:_*)
           new Node[Polygon, Vector]{
             def getNeighbors: Vector[Polygon] = neighbors
@@ -92,8 +129,6 @@ class HexGrid(hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Long) 
             def self: Polygon = center
           }
         }
-
-
       }
       ns.toVector.flatten
     }

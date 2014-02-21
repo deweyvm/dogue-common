@@ -55,6 +55,7 @@ object Polygon {
 }
 
 case class Polygon(lines:Vector[Line]) {
+  lazy val hash = lines.hashCode()
   //fixme issue #211
   lazy val points:Vector[Point2d] = {
     val pts = lines map {_.p}
@@ -125,5 +126,5 @@ case class Polygon(lines:Vector[Line]) {
     }
   }
 
-  override def hashCode() = lines.hashCode()
+  override def hashCode() = hash
 }

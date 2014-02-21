@@ -4,7 +4,7 @@ import com.deweyvm.dogue.common.procgen.{Node, Polygon, Graph}
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 
-class VoronoiGraph(faces:Vector[Polygon]) extends Graph[Polygon, Vector] {
+/*class VoronoiGraph(faces:Vector[Polygon]) extends Graph[Polygon, Vector] {
   private val nodes_ = {
 
     faces map { poly1 =>
@@ -25,4 +25,4 @@ class VoronoiGraph(faces:Vector[Polygon]) extends Graph[Polygon, Vector] {
 
 
   def nodes = nodes_
-}
+}*/

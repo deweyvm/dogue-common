@@ -2,7 +2,7 @@ package com.deweyvm.dogue.common.procgen
 
 import scala.util.Random
 import com.deweyvm.dogue.common.data.Array2d
-import com.deweyvm.gleany.data.{Point2i, Point2d}
+import com.deweyvm.gleany.data.Point2d
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 
@@ -64,13 +64,49 @@ trait HexDirection {
   }
 }
 
+object HexGrid {
+  def test() {
+    /*
+     *   0       2
+     *       1       3
+     *   4       6
+     *       5       7
+     *   8       10
+     *
+     *
+     *   hexes 10 and 12 are partial and therefore arent full hexes
+     */
+    val hex = new HexGrid(32, 5, 7, 0, 0)
+    val tests = List( //(polyNumber, numNeighbors)
+      (0, 2),
+      (1, 5),
+      (2, 3),
+      (3, 3),
+      (4, 4),
+      (5, 5),
+      (6, 6),
+      (7, 3),
+      (8, 2),
+      (10, 3)
+    )
+    tests foreach { case (polyNumber, numNeighbors) =>
+      val polyOpt = hex.polys(polyNumber)
+      assert(polyOpt.isDefined, "poly %d undefined" format polyNumber)
+      polyOpt foreach {poly =>
+        val actualN = hex.graph.getNode(poly).map {_.getNeighbors.length}.getOrElse(-1)
+        assert(actualN == numNeighbors, "Neighbors: got (%d) expected (%d)" format (actualN, numNeighbors))
+      }
+    }
+  }
+}
+
 class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Long) {
   import Hex._
   val hexCols = cols - 1
   val hexRows = (rows - 1)/2
-  var debug = false
-  def output(s:String) = if (debug) println(s)
-  def makeHexes = {
+  private var debug = false
+  private def output(s:String) = if (debug) println(s)
+  private def makeHexes = {
     val factor = math.sqrt(3)/8
     val r = new Random(seed)
     def rd = (r.nextDouble() - 0.5)*distortion
@@ -85,7 +121,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
   /**
    * must keep Option here so we can conveniently get adjacent hexes later
    */
-  def makePolys:Vector[Option[Polygon]] = {
+  private def makePolys:Vector[Option[Polygon]] = {
     val polys = for (i <- 0 until hexCols*hexRows) yield {
       val x0 = i % (cols - 1)
       val y0 = (i / (cols - 1)) * 2
@@ -106,39 +142,38 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     polys.toVector
   }
 
-  def makeGraph:Graph[Polygon, Vector] = {
-    val nodes_ :Vector[Node[Polygon, Vector]] = {
+  private def makeGraph:Graph[Polygon, Vector] = {
+    val nodes:Map[Polygon, Node[Polygon, Vector]] = {
       val ns = for (i <- 0 until hexCols*hexRows) yield {
         val current:Option[Polygon] = polys(i)
         current map { center =>
           val (x, y) = indexToCoords(i, hexCols)
           val neighbors = Hex.getNeighbors(x, y, polys, hexCols)
           val nSet = Set(neighbors:_*)
-          new Node[Polygon, Vector]{
+          val node = new Node[Polygon, Vector]{
             def getNeighbors: Vector[Polygon] = neighbors
             def isNeighbor(t: Polygon): Boolean = nSet.contains(t)
             def self: Polygon = center
           }
+          (center, node)
         }
       }
-      ns.toVector.flatten
+      ns.toVector.flatten.toMap
     }
-
-    new Graph[Polygon, Vector] {
-      def nodes = nodes_
-    }
+    Graph.createVec(nodes)
   }
 
   /**
    * Returns a list of polygons closest to the point for further checking
    */
-  def pointToPolys(px:Int, py:Int):Vector[Polygon] = {
+  private def pointToPolys(px:Int, py:Int):Vector[Polygon] = {
     val x = (px/hexSize).toInt
     val yOffset = x.isOdd.select(-hexSize/2, 0)
     val y = ((3.0/4.0)*(py + yOffset)/hexSize).toInt
     val k = Hex.coordsToIndex(x, y, hexCols)
     if (k < polys.length && k >= 0) {
       val p = polys(k)
+      println(k)
       p.map{_ +: Hex.getNeighbors(x, y, polys, hexCols)}.getOrElse(Vector())
     } else {
       Vector()

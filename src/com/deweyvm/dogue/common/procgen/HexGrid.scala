@@ -129,8 +129,28 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     }
   }
 
-  def pointToPoly(x:Int, y:Int):Option[Polygon] = {
+  /**
+   * Returns a list of polygons closest to the point for further checking
+   */
+  def pointToPolys(px:Int, py:Int):Vector[Polygon] = {
+    val x = (px/hexSize).toInt
+    val yOffset = x.isOdd.select(-hexSize/2, 0)
+    val y = ((3.0/4.0)*(py + yOffset)/hexSize).toInt
+    val k = Hex.coordsToIndex(x, y, hexCols)
+    if (k < polys.length && k >= 0) {
+      val p = polys(k)
+      p.map{_ +: Hex.getNeighbors(x, y, polys, hexCols)}.getOrElse(Vector())
+    } else {
+      Vector()
+    }
+  }
 
+  /**
+   * Returns a polygon that the given point is inside. If multiple polys match, an
+   * arbitrary one is chosen and returned.
+   */
+  def pointInPoly(px:Int, py:Int):Option[Polygon] = {
+    pointToPolys(px, py) find {_.contains(Point2d(px, py))}
   }
 
   val hexes = makeHexes

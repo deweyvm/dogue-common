@@ -55,6 +55,38 @@ object Polygon {
 }
 
 case class Polygon(lines:Vector[Line]) {
+  //fixme issue #211
+  lazy val points:Vector[Point2d] = {
+    val pts = lines map {_.p}
+    pts :+ pts(0)
+  }
+  lazy val signedArea:Double = {
+    var sum = 0.0
+    for (i <- 0 until points.length - 1) {
+      val xi0 = points(i).x
+      val xi1 = points(i+1).x
+      val yi0 = points(i).y
+      val yi1 = points(i+1).y
+      sum +=  xi0*yi1 - xi1*yi0
+    }
+    sum/2
+  }
+
+  //fixme issue #212
+  lazy val centroid:Point2d = {
+    var cx = 0.0
+    var cy = 0.0
+    for (i <- 0 until points.length - 1) {
+      val xi0 = points(i).x
+      val xi1 = points(i+1).x
+      val yi0 = points(i).y
+      val yi1 = points(i+1).y
+      val p = xi0*yi1 - xi1*yi0
+      cx += (xi0 + xi1)*p
+      cy += (yi0 + yi1)*p
+    }
+    Point2d(cx, cy)/(6*signedArea)
+  }
 
   def upperLeft:Option[Point2d] = {
     val p1 = lines.map {l => Vector(l.p, l.q)}

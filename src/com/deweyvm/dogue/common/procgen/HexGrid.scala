@@ -121,7 +121,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
    * must keep Option here so we can conveniently get adjacent hexes later
    */
   private def makePolys:Vector[Option[Polygon]] = {
-    val polys = for (i <- 0 until hexCols*hexRows) yield {
+    val polys = (0 until hexCols*hexRows).par.map{ i =>
       val x0 = i % (cols - 1)
       val y0 = (i / (cols - 1)) * 2
       val yOffset = x0.isOdd select (1, 0)
@@ -146,11 +146,10 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
       val ns = polys.zipWithIndex.map { case (current, i) =>
         current.map { center =>
           val (x, y) = indexToCoords(i, hexCols)
-          //val neighbors =
           val node = new Node[Polygon, Vector]{
-            lazy val n = Hex.getNeighbors(x, y, polys, hexCols)
-            lazy val nSet = Set(n:_*)
-            def getNeighbors: Vector[Polygon] = n//eighbors
+            lazy val neighbors = Hex.getNeighbors(x, y, polys, hexCols)
+            lazy val nSet = Set(neighbors:_*)
+            def getNeighbors: Vector[Polygon] = neighbors
             def isNeighbor(t: Polygon): Boolean = nSet.contains(t)
             def self: Polygon = center
           }
@@ -186,7 +185,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     pointToPolys(px, py) find {_.contains(Point2d(px, py))}
   }
 
-  val hexes = Timer.printMillisString("hex array    ", () => makeHexes)
-  val polys = Timer.printMillisString("polyfication ", () => makePolys)
-  val graph = Timer.printMillisString("grapher      ", () => makeGraph)
+  val hexes = makeHexes
+  val polys = makePolys
+  val graph = makeGraph
 }

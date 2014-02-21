@@ -40,8 +40,7 @@ object Hex {
     getAll map { _.getOffset(i) }
   }
 
-  def getNeighbors(i:Int, j:Int, polys:Vector[Option[Polygon]], hexCols:Int):Vector[Polygon] = {
-    val (x, y) = indexToCoords(i, hexCols)
+  def getNeighbors(x:Int, y:Int, polys:Vector[Option[Polygon]], hexCols:Int):Vector[Polygon] = {
     def getPoly(offset:(Int,Int)):Option[Polygon] = {
       val (iOffset, jOffset) = offset
       val k = coordsToIndex(x + iOffset, y + jOffset, hexCols)
@@ -113,15 +112,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
         val current:Option[Polygon] = polys(i)
         current map { center =>
           val (x, y) = indexToCoords(i, hexCols)
-          def getPoly(iOffset:Int, jOffset:Int):Option[Polygon] = {
-            val k = coordsToIndex(x + iOffset, y + jOffset, hexCols)
-            if (k < 0 || k > polys.length - 1 || x + iOffset > hexCols - 1 || x + iOffset < 0) {
-              None
-            } else {
-              polys(k)
-            }
-          }
-          val neighbors = Hex.getNeighborOffsets(x).map{ case (i, j) => getPoly(i, j)}.flatten
+          val neighbors = Hex.getNeighbors(x, y, polys, hexCols)
           val nSet = Set(neighbors:_*)
           new Node[Polygon, Vector]{
             def getNeighbors: Vector[Polygon] = neighbors
@@ -136,6 +127,10 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
     new Graph[Polygon, Vector] {
       def nodes = nodes_
     }
+  }
+
+  def pointToPoly(x:Int, y:Int):Option[Polygon] = {
+
   }
 
   val hexes = makeHexes

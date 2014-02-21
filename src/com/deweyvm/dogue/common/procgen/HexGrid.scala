@@ -75,7 +75,7 @@ object HexGrid {
      *   8       10
      *
      *
-     *   hexes 10 and 12 are partial and therefore arent full hexes
+     * hexes 10 and 12 are partial and therefore arent full hexes. we do not test them
      */
     val hex = new HexGrid(32, 5, 7, 0, 0)
     val tests = List( //(polyNumber, numNeighbors)
@@ -90,14 +90,17 @@ object HexGrid {
       (8, 2),
       (10, 3)
     )
-    tests foreach { case (polyNumber, numNeighbors) =>
-      val polyOpt = hex.polys(polyNumber)
-      assert(polyOpt.isDefined, "poly %d undefined" format polyNumber)
-      polyOpt foreach {poly =>
-        val actualN = hex.graph.getNode(poly).map {_.getNeighbors.length}.getOrElse(-1)
-        assert(actualN == numNeighbors, "Neighbors for %d: got (%d) expected (%d)" format (polyNumber, actualN, numNeighbors))
+    (0 until 50) foreach { _ =>
+      tests foreach { case (polyNumber, numNeighbors) =>
+        val polyOpt = hex.polys(polyNumber)
+        assert(polyOpt.isDefined, "poly %d undefined" format polyNumber)
+        polyOpt foreach {poly =>
+          val actualN = hex.graph.getNode(poly).map {_.getNeighbors.length}.getOrElse(-1)
+          assert(actualN == numNeighbors, "Neighbors for %d: got (%d) expected (%d)" format (polyNumber, actualN, numNeighbors))
+        }
       }
     }
+
   }
 }
 
@@ -121,7 +124,7 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
    * must keep Option here so we can conveniently get adjacent hexes later
    */
   private def makePolys:Vector[Option[Polygon]] = {
-    val polys = (0 until hexCols*hexRows).par.map{ i =>
+    val polys = (0 until hexCols*hexRows).map{ i =>
       val x0 = i % (cols - 1)
       val y0 = (i / (cols - 1)) * 2
       val yOffset = x0.isOdd select (1, 0)
@@ -144,8 +147,8 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
   private def makeGraph:Graph[Polygon, Vector] = {
     val nodes:Map[Polygon, Node[Polygon, Vector]] = {
       val ns = polys.zipWithIndex.map { case (current, i) =>
+        val (x, y) = indexToCoords(i, hexCols)
         current.map { center =>
-          val (x, y) = indexToCoords(i, hexCols)
           val node = new Node[Polygon, Vector]{
             lazy val neighbors = Hex.getNeighbors(x, y, polys, hexCols)
             lazy val nSet = Set(neighbors:_*)

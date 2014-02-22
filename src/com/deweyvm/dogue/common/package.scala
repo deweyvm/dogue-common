@@ -22,7 +22,8 @@ package object common {
     implicit def any2Unit[A](a:A) = new EnrichedUnit(a)
     implicit def any2Printable[A](a:A) = new Printable[A](a)
     implicit def bool2Select[A](b:Boolean) = new Select(b)
-    implicit def valToScalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
+    implicit def val2Scalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
+    implicit def double2Meters(self:Double) = new Meters(self)
   }
 
   object Functions {

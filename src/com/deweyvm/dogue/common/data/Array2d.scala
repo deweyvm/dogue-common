@@ -4,6 +4,8 @@ import org.scalacheck.{Prop, Gen, Arbitrary}
 import scala.util.Random
 import com.deweyvm.dogue.common.testing.Test
 import scala.Some
+import com.deweyvm.dogue.common.Implicits
+import Implicits._
 
 object Array2d {
   def tabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
@@ -28,6 +30,8 @@ object Array2d {
   def fill[T](cols:Int, rows:Int)(t:T):Array2d[T] = {
     new Array2d(Vector.fill(cols*rows)(t), cols, rows)
   }
+
+  def unsafeGetElements[T](a:Array2d[T]):Vector[T] = a.elements
 
   @inline def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
   @inline def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
@@ -61,7 +65,7 @@ object Array2d {
 
 
 
-class Array2d[+T](val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
+class Array2d[+T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   import Array2d._
 
   def rows = rows_
@@ -80,6 +84,15 @@ class Array2d[+T](val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexe
 
   def max[K >: T](implicit cmp: Ordering[K]):T = elements.max(cmp)
   def min[K >: T](implicit cmp: Ordering[K]):T = elements.min(cmp)
+
+  def find(f:T=> Boolean):Option[(Int, Int, T)] = {
+    elements.zipWithIndex.find {case (e, i) =>
+      f(e)
+    }.flatMap{case (e, i) =>
+      val (x, y) = indexToCoords(i, cols)
+      (x, y, e).some
+    }
+  }
 
   /**
    * Cut "this" down to the given size from the upper left corner.

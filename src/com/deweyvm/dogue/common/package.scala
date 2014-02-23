@@ -23,7 +23,21 @@ package object common {
     implicit def any2Printable[A](a:A) = new Printable[A](a)
     implicit def bool2Select[A](b:Boolean) = new Select(b)
     implicit def val2Scalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
-    implicit def double2Meters(self:Double) = new Meters(self)
+    //implicit def double2Meters(self:Double) = new Meters(self)
+
+
+
+    implicit class Meters(val d:Double) extends AnyVal {
+      def m:Meters = this
+      def f = d.toFloat
+      def >(other:Meters) = d > other.d
+      def >=(other:Meters) = d >= other.d
+      def <(other:Meters) = d < other.d
+      def <=(other:Meters) = d <= other.d
+      def unary_- = Meters(-d)
+
+    }
+
   }
 
   object Functions {

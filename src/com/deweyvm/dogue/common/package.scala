@@ -25,8 +25,6 @@ package object common {
     implicit def val2Scalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
     //implicit def double2Meters(self:Double) = new Meters(self)
 
-
-
     implicit class Meters(val d:Double) extends AnyVal {
       def m:Meters = this
       def f = d.toFloat
@@ -35,7 +33,10 @@ package object common {
       def <(other:Meters) = d < other.d
       def <=(other:Meters) = d <= other.d
       def unary_- = Meters(-d)
+    }
 
+    implicit class Pressure(val d:Double) extends AnyVal {
+      def atm:Pressure = this
     }
 
   }

@@ -1,17 +1,13 @@
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.gleany.graphics.Color
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
 
-case class Meters(private val rep:Double) {
+case class Meters(d:Double) extends AnyVal {
   def m:Meters = this
-  def d = rep
-  def f = rep.toFloat
-  def >(other:Meters) = rep > other.rep
-  def >=(other:Meters) = rep >= other.rep
-  def <(other:Meters) = rep < other.rep
-  def <=(other:Meters) = rep <= other.rep
-  def unary_- = Meters(-rep)
+  def f = d.toFloat
+  def >(other:Meters) = d > other.d
+  def >=(other:Meters) = d >= other.d
+  def <(other:Meters) = d < other.d
+  def <=(other:Meters) = d <= other.d
+  def unary_- = Meters(-d)
 
 }

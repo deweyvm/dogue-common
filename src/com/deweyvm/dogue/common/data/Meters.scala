@@ -12,6 +12,6 @@ case class Meters(private val rep:Double) {
   def >=(other:Meters) = rep >= other.rep
   def <(other:Meters) = rep < other.rep
   def <=(other:Meters) = rep <= other.rep
-
+  def unary_- = Meters(-rep)
 
 }

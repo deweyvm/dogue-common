@@ -4,7 +4,20 @@ import java.io.{FileOutputStream, File}
 import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.dogue.common.Implicits._
 import com.deweyvm.gleany.data.Time
+import com.deweyvm.dogue.common.logging.Log.All
 
+
+object LogLevel {
+  def fromString(s:String):LogLevel = s.toLowerCase match {
+    case "all" => Log.All
+    case "verbose" => Log.Verbose
+    case "info" => Log.Info
+    case "warn" => Log.Warn
+    case "error" => Log.Error
+    case "silent" => Log.Silent
+    case _ => Log.Info
+  }
+}
 
 class LogLevel(val marker:String, val loudness:Int) {
   def <(other:LogLevel):Boolean = {
@@ -29,6 +42,7 @@ object Log {
   case object Warn extends LogLevel("WARN", 2)
   case object Error extends LogLevel("ERR ", 1)
   case object Silent extends LogLevel("NONE", 0)
+  val levels = List(All, Verbose, Info, Warn, Error, Silent)
   private var log:Option[Log] = None
 
   //Must be called before logging functions or they will have no effect

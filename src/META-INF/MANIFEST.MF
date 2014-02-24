@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
-Class-Path: scopt_2.10-3.2.0.jar gdx.jar gdx-natives.jar gdx-sources.j
- ar gdx-freetype.jar gdx-controllers.jar gdx-backend-lwjgl.jar gdx-fre
- etype-natives.jar gdx-freetype-sources.jar gdx-controllers-desktop.ja
- r gdx-controllers-sources.jar gdx-backend-lwjgl-natives.jar gdx-backe
- nd-lwjgl-sources.jar gdx-controllers-desktop-natives.jar gdx-controll
- ers-desktop-sources.jar scala-actors.jar scala-library.jar scala-swin
- g.jar
+Class-Path: scala-actors.jar scala-library.jar scala-swing.jar scala-r
+ eflect.jar scalacheck_2.10-1.11.3.jar gdx.jar gdx-natives.jar gdx-sou
+ rces.jar gdx-freetype.jar gdx-controllers.jar gdx-backend-lwjgl.jar g
+ dx-freetype-natives.jar gdx-freetype-sources.jar gdx-controllers-desk
+ top.jar gdx-controllers-sources.jar gdx-backend-lwjgl-natives.jar gdx
+ -backend-lwjgl-sources.jar gdx-controllers-desktop-natives.jar gdx-co
+ ntrollers-desktop-sources.jar scopt_2.10-3.2.0.jar
 Main-Class: 
 

@@ -145,7 +145,7 @@ object Voronoi {
           (newSet, None)
         } else {
           debug("~~~~~~~~~~ACCEPT~~~~~~~~~")
-          (newSet, Polygon(currentPoly.toVector).some)
+          (newSet, Polygon.fromLines(currentPoly.toVector))
         }
 
       }

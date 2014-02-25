@@ -5,20 +5,37 @@ import com.deweyvm.dogue.common.Implicits
 import Implicits._
 
 object Polygon {
+  /**
+   * Public constructor for polygon objects
+   * @param l1 \
+   * @param l2 | - the 1,2,3th line of the polygon
+   * @param l3 /
+   * @param rest the remaining lines of the polygon, may be empty
+   */
+  /*def create(l1:Line, l2:Line, l3:Line, rest:Vector[Line]) = {
+    new Polygon(l1 +: l2 +: l3 +: rest)
+  }*/
+
+  def fromLines(lines:Vector[Line]) = lines match {
+    case a +: b +: c +: rest =>
+      new Polygon(lines).some
+    case _ => None
+  }
+
   private var count = BigInt(0)
-  def fromPoints(points:Vector[Point2d]):Polygon = {
+  def fromPoints(points:Vector[Point2d]):Option[Polygon] = {
     val toPair = points(points.length - 1) +: points
     val lines = (0 until toPair.length - 1).map { i =>
       val p1 = toPair(i)
       val p2 = toPair(i+1)
       Line(p1, p2)
     }
-    Polygon(lines.toVector)
+    fromLines(lines.toVector)
   }
 
 
   def test() {
-    val poly = Polygon(Vector(
+    val poly = Polygon.fromLines(Vector(
       new Line(1,1,3,2),
       new Line(3,2,4,1),
       new Line(4,1,6,4),
@@ -30,8 +47,6 @@ object Polygon {
       new Line(3,4,2,7),
       new Line(2,7,1,6),
       new Line(1,6,1,1)
-
-
     ))
     val points = List(
       (Point2d(0,0), false),
@@ -47,7 +62,7 @@ object Polygon {
     )
 
     points foreach { case (p, expect) =>
-      val v = poly.contains(p)
+      val v = poly.exists{_.contains(p)}
       assert (v == expect, "%s expected (%s) got (%s)" format (p, expect, v))
     }
 
@@ -55,7 +70,9 @@ object Polygon {
 
 }
 
-case class Polygon(lines:Vector[Line]) {
+
+class Polygon private (val lines:Vector[Line]) {
+
   val code = Polygon.count
   Polygon.count += 1
   //fixme issue #211
@@ -113,10 +130,6 @@ case class Polygon(lines:Vector[Line]) {
     }
     intersections.isOdd
 
-  }
-
-  def scale(s:Double) = {
-    copy(lines = lines map {_.scale(s)})
   }
 
   override def equals(obj:Any) = {

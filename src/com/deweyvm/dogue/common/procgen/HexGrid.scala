@@ -137,8 +137,9 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
         R  <- hexes.get(x + 1, y + 1)
         LL <- hexes.get(x,     y + 2)
         LR <- hexes.get(x + 1, y + 2)
+        poly <- Polygon.fromPoints(Vector(UL, UR, R, LR, LL, L))
       } yield {
-        Polygon.fromPoints(Vector(UL, UR, R, LR, LL, L))
+        poly
       }
     }
     polys.toVector

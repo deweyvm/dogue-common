@@ -5,17 +5,6 @@ import com.deweyvm.dogue.common.Implicits
 import Implicits._
 
 object Polygon {
-  /**
-   * Public constructor for polygon objects
-   * @param l1 \
-   * @param l2 | - the 1,2,3th line of the polygon
-   * @param l3 /
-   * @param rest the remaining lines of the polygon, may be empty
-   */
-  /*def create(l1:Line, l2:Line, l3:Line, rest:Vector[Line]) = {
-    new Polygon(l1 +: l2 +: l3 +: rest)
-  }*/
-
   def fromLines(lines:Vector[Line]) = lines match {
     case a +: b +: c +: rest =>
       new Polygon(lines).some
@@ -75,7 +64,6 @@ class Polygon private (val lines:Vector[Line]) {
 
   val code = Polygon.count
   Polygon.count += 1
-  //fixme issue #211
   lazy val points:Vector[Point2d] = {
     val pts = lines map {_.p}
     pts :+ pts(0)
@@ -92,7 +80,7 @@ class Polygon private (val lines:Vector[Line]) {
     sum/2
   }
 
-  //fixme issue #212
+  //this assumes that the lines are in cw or ccw order
   lazy val centroid:Point2d = {
     var cx = 0.0
     var cy = 0.0

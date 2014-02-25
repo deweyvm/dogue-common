@@ -105,7 +105,7 @@ case class Polygon(lines:Vector[Line]) {
   def contains(pt:Point2d):Boolean = {
     val ray = new Line(pt, Point2d(Int.MaxValue, 5000))
     val intersections = lines.foldLeft(0){case (acc, line) =>
-      if (ray.intersectPoint(line).isDefined) {
+      if (ray.intersectPointEnd(line).isDefined) {
         acc + 1
       } else {
         acc

@@ -26,7 +26,7 @@ object Voronoi {
       edges foreach { e2 =>
         val l1 = e1.toLine
         val l2 = e2.toLine
-        val intersect = l1.intersectPoint(l2)
+        val intersect = l1.intersectPointEnd(l2)
         intersect.map { pt =>
           if (rect.contains(pt) &&
             l1.getAdjacentEpsilon(pt, epsilon).isEmpty &&

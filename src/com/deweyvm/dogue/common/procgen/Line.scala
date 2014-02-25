@@ -5,6 +5,7 @@ import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import java.util.Objects
 import com.deweyvm.dogue.common.data.Angles
+import scala.util.Random
 
 object Line {
   def test() {
@@ -67,8 +68,6 @@ object Line {
       (new Line(0,0,0,1), new Line(1,1,0,1), Point2d(0,1).some),
       (new Line(0,0,0,1), new Line(0,0,0,1), None),
       (new Line(0,0,0,1), new Line(0,3,0,4), None)
-
-
     )
     tests foreach (assertRes _).tupled
   }
@@ -105,7 +104,7 @@ case class Line(p:Point2d, q:Point2d) {
 
 
   //http://stackoverflow.com/a/14795484/892213
-  def intersectPoint(other:Line):Option[Point2d] = {
+  private def intersectPoint(other:Line):Option[Point2d] = {
 
     val s10_x = q.x - p.x
     val s10_y = q.y - p.y

@@ -57,8 +57,20 @@ object Polygon {
 
   }
 
-}
+  def filterDuplicates(ps:Vector[Polygon]) = {
+    def polyClose(p1:Polygon, p2:Polygon) = {
+      math.abs((p1.centroid - p2.centroid).magnitude2) < 0.01
+    }
+    ps.foldLeft(Vector[Polygon]()) { case (acc, p) =>
+      if (!acc.exists{polyClose(_, p)}) {
+        p +: acc
+      } else {
+        acc
+      }
+    }
+  }
 
+}
 
 class Polygon private (val lines:Vector[Line]) {
 
@@ -96,6 +108,13 @@ class Polygon private (val lines:Vector[Line]) {
     Point2d(cx, cy)/(6*signedArea)
   }
 
+  /**
+   * the distance between the centroid and farthest point
+   */
+  lazy val radius:Double = {
+    points.map { p => (p - centroid).magnitude2 }.max.sqrt
+  }
+
   def upperLeft:Option[Point2d] = {
     val p1 = lines.map {l => Vector(l.p, l.q)}
     val points:Vector[Point2d] = p1.flatten
@@ -117,8 +136,9 @@ class Polygon private (val lines:Vector[Line]) {
       }
     }
     intersections.isOdd
-
   }
+
+  def translate(p:Point2d) = new Polygon(lines.map {_.translate(p)})
 
   override def equals(obj:Any) = {
     if (!obj.isInstanceOf[Polygon]) {

@@ -78,6 +78,8 @@ case class Line(p:Point2d, q:Point2d) {
 
   lazy val length = (q - p).magnitude
 
+  def translate(pt:Point2d) = Line(p + pt, q + pt)
+
   /**
    * returns point if lines are touching only at endpoints or intersecting
    * @param other

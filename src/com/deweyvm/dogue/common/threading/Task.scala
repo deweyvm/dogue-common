@@ -6,7 +6,7 @@ import com.deweyvm.dogue.common.logging.Log
 abstract class Task {
   private var running = true
 
-  final protected def kill() {
+  final def kill() {
     if (running) {
       running = false
       killAux()

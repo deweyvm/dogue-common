@@ -65,7 +65,7 @@ class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends
 
   def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Lazy2d[K] = {
     def newGetter(i:Int, j:Int) = {
-      get(i + x, j + y).map(f).getOrElse(default)
+      get(i + x, j + y).fold(default)(f)
     }
     new Lazy2d(newGetter, width, height)
   }

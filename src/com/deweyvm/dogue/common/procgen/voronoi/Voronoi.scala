@@ -162,11 +162,7 @@ object Voronoi {
       val (s2, cw) = followCircular(s1, lines, line, 1, rect)
       (polys ++ ccw ++ cw, s2)
     }
-    faces._1.length.println()
-    val res = Polygon.filterDuplicates(Polygon.filterDuplicates(faces._1))
-    res foreach {_.centroid.println()}
-    res.length.println()
-    res
+    Polygon.filterDuplicates(Polygon.filterDuplicates(faces._1))
   }
 }
 

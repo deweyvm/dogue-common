@@ -67,7 +67,7 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
 
 
 
-  def lazyRender:Indexed2d[Double] = {
+  def lazyRender:Lazy2d[Double] = {
     def func(x:Int, y:Int) = {
       fBm(freq*x, freq*y, (size*freq).toInt, octaves)
     }

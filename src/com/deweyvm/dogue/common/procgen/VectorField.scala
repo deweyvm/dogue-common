@@ -6,21 +6,13 @@ import Implicits._
 import com.deweyvm.gleany.graphics.Color
 import scala.util.Random
 import com.deweyvm.dogue.common.data.{Angles, Lazy2d, Array2d, Indexed2d}
+import scala.collection.immutable.IndexedSeq
 
 object VectorField {
-  def simpleSpiral(width:Int, height:Int) = {
-    def dd(i:Double, j:Double):Point2d = {
-      val x = i
-      val y = j
-      val mag = Point2d(x, y).magnitude
-      Point2d(y*mag, -x*mag)
-    }
-    new VectorField(-width, -height, 2*width, 2*height, 40, dd)
-  }
 
   def test() {
     def takeGradient(ones:Vector[(Int,Int)]) = {
-      gradient(Array2d.tabulate(3,3) {case (i, j)  =>
+      gradient(Lazy2d.tabulate(3,3) {case (i, j)  =>
         if (ones.contains((i, j))) {
           1
         } else {
@@ -125,7 +117,7 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
-  def perlinWind(solidElevation:Double, noise:Indexed2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
+  def perlinWind(solidElevation:Double, noise:Lazy2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
     def pow(k:Double) = math.pow(k, 1.25)
     def getInfluence(i:Double, j:Double):Point2d = {
       val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
@@ -183,6 +175,16 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
+  def simpleSpiral(width:Int, height:Int) = {
+    def dd(i:Double, j:Double):Point2d = {
+      val x = i
+      val y = j
+      val mag = Point2d(x, y).magnitude
+      Point2d(y*mag, -x*mag)
+    }
+    new VectorField(-width, -height, 2*width, 2*height, 40, dd)
+  }
+
   def magToColor(mag:Double):Color = {
     //Color.fromHsb((mag.toFloat/100 + 0.45f) % 1)
     Color.fromHsb((mag.toFloat + 0.35f) % 1)
@@ -210,4 +212,5 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, dd:(Double, Doub
     getArrow(i, j)
 
   }
+
 }

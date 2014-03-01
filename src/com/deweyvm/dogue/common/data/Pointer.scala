@@ -16,7 +16,18 @@ object Pointer {
 
 class Pointer[T] private (elts:Vector[T], ptr:Int) {
   def get:T = elts(ptr)
-  def map(f:T=>T) = new Pointer(elts.updated(ptr, f(get)), ptr)
+  def mapOne[K](f:T => T):Pointer[T] = {
+    new Pointer[T](elts.updated(ptr, f(get)), ptr)
+  }
+
+  def foreach(selected:T => Unit, notSelected:T => Unit):Unit = elts.zipWithIndex foreach { case (t, i) =>
+    if (ptr == i) {
+      selected(t)
+    } else {
+      notSelected(t)
+    }
+  }
+  def zipWithIndex:Pointer[(T, Int)] = new Pointer(elts.zipWithIndex, ptr)
   def length:Int = elts.length
   def updated(offset:Int):Pointer[T] = {
     new Pointer(elts, (ptr + offset + length) % length)

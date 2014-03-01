@@ -154,7 +154,6 @@ object VectorField {
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
       grad.rotate(-Angles.Tau/4).normalize * 20
-
     }
     def dd(i:Double, j:Double):Point2d = {
       val p = Point2d(i, j)

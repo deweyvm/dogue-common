@@ -50,7 +50,7 @@ object VectorField {
    * @return
    */
   def gradient(array:Indexed2d[Double], i:Int, j:Int):Point2d = {
-    val grid: Indexed2d[Double] = array.slice(i-1, j-1, 3, 3, x => x, 0)
+    val grid: Indexed2d[Double] = array.slice(i-1, j-1, 3, 3, 0)
     def p(x:Double, y:Double) = Point2d(x, y)
 
     val c11:Double = grid.get(1,1).getOrElse(0.0)

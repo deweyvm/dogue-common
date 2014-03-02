@@ -37,33 +37,31 @@ class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends
 
   def map[K](f:(Int, Int, T) => K):Lazy2d[K] = {
     def newGetter(i:Int, j:Int):K = {
-        val t = unsafeGet(i, j)
-        f(i, j, t)
+      val t = unsafeGet(i, j)
+      f(i, j, t)
     }
     new Lazy2d(newGetter, cols, rows)
   }
 
   private def unsafeGet(i:Int, j:Int):T = {
     val index = Array2d.coordsToIndex(i, j, cols)
-    if (buffer.contains(index)) {
-      buffer(index)
-    } else {
+    buffer.get(index).getOrElse({
       val res = getter(i, j)
       buffer(index) = res
       res
-    }
+    })
   }
 
-  def cut[K](c:Int, r:Int, f:T => K, default: => K):Lazy2d[K] = {
-    def newGetter(i:Int, j:Int):K = {
-      get(i, j).fold(default)(f)
+  def cut(c:Int, r:Int, default:T):Lazy2d[T] = {
+    def newGetter(i:Int, j:Int):T = {
+      get(i, j).getOrElse(default)
     }
     new Lazy2d(newGetter, c, r)
   }
 
-  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Lazy2d[K] = {
+  def slice(x:Int, y:Int, width:Int, height:Int, default:T):Lazy2d[T] = {
     def newGetter(i:Int, j:Int) = {
-      get(i + x, j + y).fold(default)(f)
+      get(i + x, j + y).getOrElse(default)
     }
     new Lazy2d(newGetter, width, height)
   }

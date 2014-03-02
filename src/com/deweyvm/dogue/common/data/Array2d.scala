@@ -65,7 +65,7 @@ object Array2d {
 
 
 
-class Array2d[+T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
+class Array2d[T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   import Array2d._
 
   def rows = rows_
@@ -80,7 +80,7 @@ class Array2d[+T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extend
     }
   }
 
-  def groupBy[K](f:T=>K) = elements.groupBy(f)
+  def groupBy[K](f:T => K) = elements.groupBy(f)
 
   def max[K >: T](implicit cmp: Ordering[K]):T = elements.max(cmp)
   def min[K >: T](implicit cmp: Ordering[K]):T = elements.min(cmp)
@@ -98,9 +98,9 @@ class Array2d[+T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extend
    * Cut "this" down to the given size from the upper left corner.
    * If "this" is too small, fill in the extra slots with a default value.
    */
-  def cut[K](c:Int, r:Int, f:T => K, default: => K):Array2d[K] = {
+  def cut(c:Int, r:Int, default:T):Array2d[T] = {
     Array2d.tabulate(c, r) { case (i, j) =>
-      get(i, j).fold(default)(f)
+      get(i, j).getOrElse(default)
     }
   }
 
@@ -129,9 +129,9 @@ class Array2d[+T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extend
     new Array2d(elements.updated(coordsToIndex(i, j, cols), t), cols, rows)
 
 
-  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Array2d[K] = {
+  def slice(x:Int, y:Int, width:Int, height:Int, default:T):Array2d[T] = {
     Array2d.tabulate(width, height) { case (i, j) =>
-      get(i + x, j + y).map(f).getOrElse(default)
+      get(i + x, j + y).getOrElse(default)
     }
   }
 

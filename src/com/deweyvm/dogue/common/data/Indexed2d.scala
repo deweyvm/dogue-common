@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.data
 
-trait Indexed2d[+T] {
+trait Indexed2d[T] {
   def cols:Int
   def rows:Int
   def strictGetAll:Vector[T]//for debugging only
@@ -11,8 +11,8 @@ trait Indexed2d[+T] {
       (t, a.get(i, j).getOrElse(default))
     }
   }
-  def cut[K](c:Int, r:Int, f:T => K, default: => K):Indexed2d[K]
+  def cut(c:Int, r:Int, default:T):Indexed2d[T]
   def get(i:Int, j:Int):Option[T]
-  def slice[K](x:Int, y:Int, width:Int, height:Int, f:T => K, default: => K):Indexed2d[K]
+  def slice(x:Int, y:Int, width:Int, height:Int, default:T):Indexed2d[T]
   def sample(div:Int):Indexed2d[T]
 }

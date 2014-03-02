@@ -12,7 +12,6 @@ object Lazy2d {
 
 class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends Indexed2d[T] {
   private val buffer = mutable.Map[Int,T]()
-  private val set = mutable.Map[Int,Boolean]().withDefaultValue(false)
 
   override def cols = cols_
   override def rows = rows_
@@ -46,12 +45,11 @@ class Lazy2d[T] private (getter:(Int, Int) => T, cols_ :Int, rows_ :Int) extends
 
   private def unsafeGet(i:Int, j:Int):T = {
     val index = Array2d.coordsToIndex(i, j, cols)
-    if (set(index)) {
+    if (buffer.contains(index)) {
       buffer(index)
     } else {
       val res = getter(i, j)
       buffer(index) = res
-      set(index) = true
       res
     }
   }

@@ -128,7 +128,7 @@ object VectorField {
         } else {
           atPoint.clamp(0,0.12)
         }
-      gradient(noise, i.toInt, j.toInt).normalize.rotate(Angles.Tau/2)*factor
+      gradient(noise, i.toInt, j.toInt).normalize.rotate(-Angles.Tau/2)*(factor/5)
     }
     def xx(i:Double) = 0.5 - i/width
     def yy(j:Double) = 0.5 - j/height

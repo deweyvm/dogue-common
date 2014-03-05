@@ -1,18 +1,17 @@
 package com.deweyvm.dogue.common.procgen
 
-import com.deweyvm.gleany.data.{Time, Point2i, Point2d}
+import com.deweyvm.gleany.data.{Point2i, Point2d}
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
 import com.deweyvm.gleany.graphics.Color
 import scala.util.Random
-import com.deweyvm.dogue.common.data.{Angles, Lazy2d, Array2d, Indexed2d}
-import scala.collection.immutable.IndexedSeq
+import com.deweyvm.dogue.common.data.{Array2dView, Array2d, Angles}
 
 object VectorField {
 
   def test() {
     def takeGradient(ones:Vector[(Int,Int)]) = {
-      gradient(Lazy2d.tabulate(3,3) {case (i, j)  =>
+      gradient(Array2d.tabulate(3,3) {case (i, j)  =>
         if (ones.contains((i, j))) {
           1
         } else {
@@ -49,20 +48,22 @@ object VectorField {
    * @param j
    * @return
    */
-  def gradient(array:Indexed2d[Double], i:Int, j:Int):Point2d = {
-    val grid: Indexed2d[Double] = array.slice(i-1, j-1, 3, 3, 0)
+  def gradient(array:Array2d[Double], i:Int, j:Int):Point2d = {
+    if (i - 1 < 0 || i + 1 > array.cols - 1 || j - 1 < 0 || j + 1 > array.rows - 1) {
+      return Point2d.Zero
+    }
+    val grid: Array2dView[Double] = array.view.slice(i-1, j-1, 3, 3)
     def p(x:Double, y:Double) = Point2d(x, y)
 
-    val c11:Double = grid.get(1,1).getOrElse(0.0)
-
-    val c00:Double = grid.get(0,0).getOrElse(c11)
-    val c01:Double = grid.get(0,1).getOrElse(c11)
-    val c02:Double = grid.get(0,2).getOrElse(c11)
-    val c10:Double = grid.get(1,0).getOrElse(c11)
-    val c12:Double = grid.get(1,2).getOrElse(c11)
-    val c20:Double = grid.get(2,0).getOrElse(c11)
-    val c21:Double = grid.get(2,1).getOrElse(c11)
-    val c22:Double = grid.get(2,2).getOrElse(c11)
+    val c11:Double = grid.get(1,1)
+    val c00:Double = grid.get(0,0)
+    val c01:Double = grid.get(0,1)
+    val c02:Double = grid.get(0,2)
+    val c10:Double = grid.get(1,0)
+    val c12:Double = grid.get(1,2)
+    val c20:Double = grid.get(2,0)
+    val c21:Double = grid.get(2,1)
+    val c22:Double = grid.get(2,2)
     val v00 = (c11 - c00) *: (p(1,1) - p(0,0))
     val v01 = (c11 - c01) *: (p(1,1) - p(0,1))
     val v02 = (c11 - c02) *: (p(1,1) - p(0,2))
@@ -105,7 +106,7 @@ object VectorField {
   }
 
   def perlin(width:Int, height:Int, scale:Int) = {
-    val noise = new PerlinNoise(1/32.0, 5, width, 0L).lazyRender
+    val noise = new PerlinNoise(1/32.0, 5, width, 0L).render
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
       600 *: grad.rotate(Angles.Tau/4)
@@ -117,7 +118,7 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
-  def perlinWind(solidElevation:Double, noise:Lazy2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
+  def perlinWind(solidElevation:Double, noise:Array2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
     def pow(k:Double) = math.pow(k, 1.25)
     def getInfluence(i:Double, j:Double):Point2d = {
       val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
@@ -150,7 +151,7 @@ object VectorField {
     val max = Point2d(width, height).magnitude/(scale*2)
 
     def pow(k:Double) = math.pow(k, 1.15)
-    val noise = new PerlinNoise(1/32.0, 5, width, seed).lazyRender
+    val noise = new PerlinNoise(1/32.0, 5, width, seed).render
     def getInfluence(i:Double, j:Double):Point2d = {
       val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
       grad.rotate(-Angles.Tau/4).normalize * 20
@@ -207,9 +208,8 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, dd:(Double, Doub
     (Point2d(i*div, j*div), Arrow(d, mag), color)
   }
 
-  val lazyVectors: Lazy2d[(Point2d, Arrow, Color)] = Lazy2d.tabulate(width, height) {case (i, j) =>
+  val lazyVectors: Array2d[(Point2d, Arrow, Color)] = Array2d.tabulate(width, height) {case (i, j) =>
     getArrow(i, j)
-
   }
 
 }

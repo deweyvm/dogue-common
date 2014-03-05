@@ -6,14 +6,21 @@ import com.deweyvm.dogue.common.testing.Test
 import scala.Some
 import com.deweyvm.dogue.common.Implicits
 import Implicits._
+import scala.collection.mutable
 
 object Array2d {
   def tabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
-    val elts = Vector.tabulate(cols*rows) { k =>
+    //println("tabulate")
+    val array = new mutable.ArraySeq[T](cols*rows)
+    for (k <- 0 until cols*rows) {
+      val (i, j) = indexToCoords(k, cols)
+      array(k) = f(i, j)
+    }
+    /*val elts = mutable.ArraySeq.tabulate(cols*rows) { k =>
       val (i, j) = indexToCoords(k, cols)
       f(i, j)
-    }
-    new Array2d(elts, cols, rows)
+    }*/
+    new Array2d(array, cols, rows)
   }
 
   def parTabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
@@ -21,17 +28,17 @@ object Array2d {
       val (i, j) = indexToCoords(k, cols)
       f(i, j)
     }
-    new Array2d(elts.toVector, cols, rows)
+    new Array2d(mutable.ArraySeq(elts.toVector:_*), cols, rows)
   }
 
   /**
    * the parameter t is evaluated once
    */
   def fill[T](cols:Int, rows:Int)(t:T):Array2d[T] = {
-    new Array2d(Vector.fill(cols*rows)(t), cols, rows)
+    new Array2d(mutable.ArraySeq.fill(cols*rows)(t), cols, rows)
   }
 
-  def unsafeGetElements[T](a:Array2d[T]):Vector[T] = a.elements
+  def unsafeGetElements[T](a:Array2d[T]):IndexedSeq[T] = a.elements
 
   @inline def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
   @inline def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
@@ -65,13 +72,14 @@ object Array2d {
 
 
 
-class Array2d[T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends Indexed2d[T] {
+class Array2d[T](private val elements:mutable.ArraySeq[T], cols_ :Int, rows_ :Int) {
+  outer =>
   import Array2d._
 
   def rows = rows_
   def cols = cols_
 
-  def strictGetAll:Vector[T] = elements
+  def strictGetAll:IndexedSeq[T] = elements
 
   def foreach(f:(Int,Int,T) => Unit) {
     elements.zipWithIndex foreach { case (t, k) =>
@@ -94,23 +102,6 @@ class Array2d[T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends
     }
   }
 
-  /**
-   * Cut "this" down to the given size from the upper left corner.
-   * If "this" is too small, fill in the extra slots with a default value.
-   */
-  def cut(c:Int, r:Int, default:T):Array2d[T] = {
-    Array2d.tabulate(c, r) { case (i, j) =>
-      get(i, j).getOrElse(default)
-    }
-  }
-
-  def map[K](f:(Int, Int, T) => K):Array2d[K] = {
-    Array2d.tabulate(cols, rows) { case (i, j) =>
-      val t = unsafeGet(i, j)
-      f(i, j, t)
-    }
-  }
-
   private def unsafeGet(i:Int, j:Int):T = {
     val k = coordsToIndex(i, j, cols)
     elements(k)
@@ -125,23 +116,27 @@ class Array2d[T](private val elements:Vector[T], cols_ :Int, rows_ :Int) extends
     }
   }
 
-  def put[R >: T](i:Int, j:Int, t:R):Array2d[R] =
-    new Array2d(elements.updated(coordsToIndex(i, j, cols), t), cols, rows)
-
-
-  def slice(x:Int, y:Int, width:Int, height:Int, default:T):Array2d[T] = {
-    Array2d.tabulate(width, height) { case (i, j) =>
-      get(i + x, j + y).getOrElse(default)
+  /*def slice(x:Int, y:Int, width:Int, height:Int, default:T):Array2dView[T] = new Array2dView[T] {
+    val cols = width
+    val rows = height
+    def get(i:Int, j:Int):T = {
+      outer.get(i + x, j + y).getOrElse(default)
     }
   }
 
-  def sample(div:Int):Array2d[T] = {
-    if (div <= 0) {
-      throw new IllegalArgumentException("div must be > 0")
-    }
-    val (newCols, newRows) = (cols/div, rows/div)
-    Array2d.tabulate(newCols, newRows) { case (i, j) =>
+  def sample(div:Int):Array2dView[T] = new Array2dView[T] {
+    val cols = outer.cols/div
+    val rows = outer.rows/div
+    def get(i:Int, j:Int):T = {
       unsafeGet(i*div, j*div)
+    }
+  }*/
+
+  def view:Array2dView[T] = new Array2dView[T] {
+    val cols = outer.cols
+    val rows = outer.rows
+    def get(i:Int, j:Int):T = {
+      unsafeGet(i, j)
     }
   }
 }

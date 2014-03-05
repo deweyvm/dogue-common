@@ -2,8 +2,7 @@ package com.deweyvm.dogue.common.procgen
 
 import scala.collection.immutable.IndexedSeq
 import scala.util.Random
-import scala.collection.mutable.ArrayBuffer
-import com.deweyvm.dogue.common.data.{Angles, Lazy2d, Indexed2d, Array2d}
+import com.deweyvm.dogue.common.data.{Angles, Array2d}
 import scala.math._
 
 object PerlinNoise {
@@ -67,12 +66,12 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
 
 
 
-  def lazyRender:Lazy2d[Double] = {
+  /*def lazyRender:Lazy2d[Double] = {
     def func(x:Int, y:Int) = {
       fBm(freq*x, freq*y, (size*freq).toInt, octaves)
     }
     Lazy2d.tabulate(size, size)(func)
-  }
+  }*/
 
   def render:Array2d[Double] = {
     Array2d.parTabulate(size, size) { case (x, y) =>

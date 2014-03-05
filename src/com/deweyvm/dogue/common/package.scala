@@ -33,6 +33,7 @@ package object common {
       def <(other:Meters) = d < other.d
       def <=(other:Meters) = d <= other.d
       def unary_- = Meters(-d)
+      override def toString = "%.2fm" format d
     }
 
     implicit class Pressure(val d:Double) extends AnyVal {

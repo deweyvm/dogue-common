@@ -176,8 +176,8 @@ object VectorField {
 
   def simpleSpiral(width:Int, height:Int) = {
     def dd(i:Double, j:Double):Point2d = {
-      val x = i
-      val y = j
+      val x = width/2 - i
+      val y = height/2 - j
       val mag = Point2d(x, y).magnitude
       Point2d(y*mag, -x*mag)
     }

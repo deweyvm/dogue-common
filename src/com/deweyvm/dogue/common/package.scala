@@ -23,7 +23,7 @@ package object common {
     implicit def any2Printable[A](a:A) = new Printable[A](a)
     implicit def bool2Select[A](b:Boolean) = new Select(b)
     implicit def val2Scalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
-    //implicit def double2Meters(self:Double) = new Meters(self)
+    implicit def any2Range[A](self:A) = new RangeCompanion(self)
 
     implicit class Meters(val d:Double) extends AnyVal {
       def m:Meters = this
@@ -34,6 +34,10 @@ package object common {
       def <=(other:Meters) = d <= other.d
       def unary_- = Meters(-d)
       override def toString = "%.2fm" format d
+    }
+
+    implicit val metersOrdered = new Ordering[Meters] {
+      def compare(m1:Meters, m2:Meters) = m1.d.compare(m2.d)
     }
 
     implicit class Pressure(val d:Double) extends AnyVal {

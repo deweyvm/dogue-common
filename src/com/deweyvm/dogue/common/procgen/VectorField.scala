@@ -13,11 +13,11 @@ object VectorField {
     def takeGradient(ones:Vector[(Int,Int)]) = {
       gradient(Array2d.tabulate(3,3) {case (i, j)  =>
         if (ones.contains((i, j))) {
-          1
+          1.0
         } else {
-          0
+          0.0
         }
-      }, 1, 1)
+      }.view, 1, 1)
     }
 
 
@@ -48,11 +48,11 @@ object VectorField {
    * @param j
    * @return
    */
-  def gradient(array:Array2d[Double], i:Int, j:Int):Point2d = {
+  def gradient(array:Array2dView[Double], i:Int, j:Int):Point2d = {
     if (i - 1 < 0 || i + 1 > array.cols - 1 || j - 1 < 0 || j + 1 > array.rows - 1) {
       return Point2d.Zero
     }
-    val grid: Array2dView[Double] = array.view.slice(i-1, j-1, 3, 3)
+    val grid: Array2dView[Double] = array.slice(i-1, j-1, 3, 3)
     def p(x:Double, y:Double) = Point2d(x, y)
 
     val c11:Double = grid.get(1,1)
@@ -108,7 +108,7 @@ object VectorField {
   def perlin(width:Int, height:Int, scale:Int) = {
     val noise = new PerlinNoise(1/32.0, 5, width, 0L).render
     def getInfluence(i:Double, j:Double):Point2d = {
-      val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
+      val grad = gradient(noise.view, i.toInt + width/scale, j.toInt + height/scale)
       600 *: grad.rotate(Angles.Tau/4)
     }
     def dd(i:Double, j:Double):Point2d = {
@@ -118,17 +118,17 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
-  def perlinWind(solidElevation:Double, noise:Array2d[Double], width:Int, height:Int, scale:Int, seed:Long) = {
+  def perlinWind(solidElevation:Double, noise:Array2dView[Double], width:Int, height:Int, scale:Int, seed:Long) = {
     def pow(k:Double) = math.pow(k, 1.25)
     def getInfluence(i:Double, j:Double):Point2d = {
-      val atPoint = noise.get(i.toInt, j.toInt).getOrElse(0.0)
+      val atPoint = noise.get(i.toInt, j.toInt)
       val factor =
         if (atPoint < solidElevation) {
           math.abs(atPoint).clamp(0,0.02)
         } else {
           atPoint.clamp(0,0.12)
         }
-      gradient(noise, i.toInt, j.toInt).normalize.rotate(-Angles.Tau/2)*(factor/5)
+      gradient(noise, i.toInt, j.toInt).rotate(-Angles.Tau/4)*(factor/50)
     }
     def xx(i:Double) = 0.5 - i/width
     def yy(j:Double) = 0.5 - j/height
@@ -153,7 +153,7 @@ object VectorField {
     def pow(k:Double) = math.pow(k, 1.15)
     val noise = new PerlinNoise(1/32.0, 5, width, seed).render
     def getInfluence(i:Double, j:Double):Point2d = {
-      val grad = gradient(noise, i.toInt + width/scale, j.toInt + height/scale)
+      val grad = gradient(noise.view, i.toInt + width/scale, j.toInt + height/scale)
       grad.rotate(-Angles.Tau/4).normalize * 20
     }
     def dd(i:Double, j:Double):Point2d = {
@@ -181,6 +181,13 @@ object VectorField {
       val y = height/2 - j
       val mag = Point2d(x, y).magnitude
       Point2d(y*mag, -x*mag)
+    }
+    new VectorField(-width, -height, 2*width, 2*height, 40, dd)
+  }
+
+  def const(width:Int, height:Int) = {
+    def dd(i:Double, j:Double):Point2d = {
+      Point2d(1, 0)
     }
     new VectorField(-width, -height, 2*width, 2*height, 40, dd)
   }

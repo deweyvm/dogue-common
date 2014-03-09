@@ -1,5 +1,7 @@
 package com.deweyvm.dogue.common.data
 
+import scala.collection.mutable.ArrayBuffer
+
 trait Array2dView[T] {
   outer =>
   val cols:Int
@@ -33,5 +35,13 @@ trait Array2dView[T] {
     def get(i:Int, j:Int):K = {
       f(i, j, outer.get(i, j))
     }
+  }
+
+  def toVector:Vector[T] = {
+    val buff = ArrayBuffer[T]()
+    for (i <- 0 until cols; j <- 0 until rows) yield {
+      buff += get(i, j)
+    }
+    buff.toVector
   }
 }

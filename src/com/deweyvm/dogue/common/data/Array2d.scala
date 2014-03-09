@@ -10,16 +10,11 @@ import scala.collection.mutable
 
 object Array2d {
   def tabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
-    //println("tabulate")
     val array = new mutable.ArraySeq[T](cols*rows)
     for (k <- 0 until cols*rows) {
       val (i, j) = indexToCoords(k, cols)
       array(k) = f(i, j)
     }
-    /*val elts = mutable.ArraySeq.tabulate(cols*rows) { k =>
-      val (i, j) = indexToCoords(k, cols)
-      f(i, j)
-    }*/
     new Array2d(array, cols, rows)
   }
 
@@ -85,6 +80,13 @@ class Array2d[T](private val elements:mutable.ArraySeq[T], cols_ :Int, rows_ :In
     elements.zipWithIndex foreach { case (t, k) =>
       val (i, j) = indexToCoords(k, cols)
       f(i, j, t)
+    }
+  }
+
+  def map[K](f:(Int,Int,T)=>K) = {
+    Array2d.tabulate(cols, rows) { case (i, j) =>
+      val elt = unsafeGet(i, j)
+      f(i, j, elt)
     }
   }
 

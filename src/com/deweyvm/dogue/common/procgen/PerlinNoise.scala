@@ -25,7 +25,7 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
 
 
   def getPerm(i:Int) = {
-    perm(i % perm.length)
+    perm((i + perm.length) % perm.length)
   }
   private val dirs = {
     ((0 until whatDoesThisVariableMean) map { i =>

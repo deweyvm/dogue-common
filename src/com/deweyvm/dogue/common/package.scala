@@ -23,7 +23,7 @@ package object common {
     implicit def any2Printable[A](a:A) = new Printable[A](a)
     implicit def bool2Select[A](b:Boolean) = new Select(b)
     implicit def val2Scalar[A](t:A)(implicit n:Numeric[A])  = new Scalar(t)
-    implicit def any2Range[A](self:A) = new RangeCompanion(self)
+    implicit def any2Range[A](self:A) = new RangeOp(self)
 
     implicit class Meters(val d:Double) extends AnyVal {
       def m:Meters = this
@@ -37,12 +37,32 @@ package object common {
       override def toString = "%.2fm" format d
     }
 
+    implicit class Pressure(val d:Double) extends AnyVal {
+      def atm:Pressure = this
+    }
+
+    implicit class Celcius(val d:Double) extends AnyVal {
+      def C:Celcius = this
+    }
+
+    /**
+     * rainfall has units of mm/year
+     * @param d
+     */
+    implicit class Rainfall(val d:Double) extends AnyVal {
+      def `mm/yr`:Rainfall = this
+    }
+
     implicit val metersOrdered = new Ordering[Meters] {
       def compare(m1:Meters, m2:Meters) = m1.d.compare(m2.d)
     }
 
-    implicit class Pressure(val d:Double) extends AnyVal {
-      def atm:Pressure = this
+    implicit val celciusOrdered = new Ordering[Celcius] {
+      def compare(c1:Celcius, c2:Celcius) = c1.d.compare(c2.d)
+    }
+
+    implicit val rainfallOrdered = new Ordering[Rainfall] {
+      def compare(r1:Rainfall, r2:Rainfall) = r1.d.compare(r2.d)
     }
 
   }

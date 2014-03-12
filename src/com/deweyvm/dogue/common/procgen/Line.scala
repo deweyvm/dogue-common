@@ -3,9 +3,7 @@ package com.deweyvm.dogue.common.procgen
 import com.deweyvm.gleany.data.Point2d
 import com.deweyvm.dogue.common.CommonImplicits
 import CommonImplicits._
-import java.util.Objects
 import com.deweyvm.dogue.common.data.Angles
-import scala.util.Random
 
 object Line {
   def test() {

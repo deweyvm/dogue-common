@@ -2,11 +2,6 @@ package com.deweyvm.dogue.common.procgen
 
 import com.deweyvm.gleany.data.{Point2d, Point2i}
 import scala.collection.mutable.ArrayBuffer
-import com.deweyvm.dogue.common.CommonImplicits
-import CommonImplicits._
-import com.deweyvm.dogue.common.procgen.voronoi.Edge
-
-
 
 
 object PolygonUtils {

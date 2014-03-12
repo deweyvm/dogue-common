@@ -1,9 +1,7 @@
 package com.deweyvm.dogue.common.io
 
 import java.net.Socket
-import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.dogue.common.CommonImplicits._
-import com.deweyvm.dogue.common.logging.Log
 
 //enriched socket for communicating over the dogue server protocol
 class EnrichedSocket(sock:Socket) {

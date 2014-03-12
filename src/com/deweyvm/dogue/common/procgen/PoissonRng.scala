@@ -2,7 +2,7 @@ package com.deweyvm.dogue.common.procgen
 
 import scala.collection.mutable.ArrayBuffer
 import scala.Some
-import com.deweyvm.gleany.data.{Point2d, Point2f}
+import com.deweyvm.gleany.data.Point2d
 import scala.util.Random
 
 import scala.math.{sin,cos}

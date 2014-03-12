@@ -4,7 +4,6 @@ import java.io.{FileOutputStream, File}
 import com.deweyvm.dogue.common.data.Encoding
 import com.deweyvm.dogue.common.CommonImplicits._
 import com.deweyvm.gleany.data.Time
-import com.deweyvm.dogue.common.logging.Log.All
 
 
 object LogLevel {

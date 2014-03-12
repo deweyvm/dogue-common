@@ -1,7 +1,7 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
-import com.deweyvm.dogue.common.procgen.{Graph, Node, Polygon, Line}
-import com.deweyvm.gleany.data.{Recti, Rectd, Point2d}
+import com.deweyvm.dogue.common.procgen.{Polygon, Line}
+import com.deweyvm.gleany.data.{Rectd, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
 import com.deweyvm.dogue.common.CommonImplicits

@@ -6,9 +6,6 @@ import com.deweyvm.dogue.common.protocol._
 import com.deweyvm.dogue.common.protocol.Invalid
 import org.scalacheck.{Prop, Gen, Arbitrary}
 import scala.util.Random
-import org.scalacheck.Test.Parameters.Default
-import org.scalacheck.Test.Result
-import org.scalacheck.util.ConsoleReporter
 import com.deweyvm.dogue.common.testing.Test
 
 

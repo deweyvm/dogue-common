@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.procgen
 
-import com.deweyvm.gleany.data.{Point2i, Point2d}
+import com.deweyvm.gleany.data.Point2d
 import com.deweyvm.dogue.common.CommonImplicits
 import CommonImplicits._
 import com.deweyvm.gleany.graphics.Color

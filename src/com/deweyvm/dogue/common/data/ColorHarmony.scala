@@ -1,6 +1,5 @@
 package com.deweyvm.dogue.common.data
 
-import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.gleany.graphics.Color
 import java.util.Random
 import com.deweyvm.dogue.common.CommonImplicits

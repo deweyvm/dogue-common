@@ -2,10 +2,8 @@ package com.deweyvm.dogue.common.io
 
 import java.io.InputStream
 import com.deweyvm.dogue.common.data.Encoding
-import com.deweyvm.dogue.common.CommonImplicits._
-import com.deweyvm.dogue.common.io
 import scala.annotation.tailrec
-import com.deweyvm.dogue.common.io.NetworkData.{Data, NoneAvailable}
+import com.deweyvm.dogue.common.io.NetworkData.Data
 import com.deweyvm.dogue.common.logging.Log
 
 class NetworkData[+T](val isEmpty:Boolean) {

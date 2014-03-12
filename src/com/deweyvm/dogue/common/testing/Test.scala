@@ -2,7 +2,6 @@ package com.deweyvm.dogue.common.testing
 
 import com.deweyvm.dogue.common.logging.Log
 import org.scalacheck.Prop
-import org.scalacheck.Gen.Parameters
 import org.scalacheck.Test.Parameters.Default
 import org.scalacheck.util.ConsoleReporter
 import org.scalacheck.Test.Result

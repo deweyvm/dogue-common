@@ -8,7 +8,7 @@ import java.io.{OutputStream, InputStream}
 
 package object common {
   def id[T](x:T) = x
-  object Implicits {
+  object CommonImplicits {
     implicit def any2Option[A](x: A):EnrichedOption[A] = new EnrichedOption(x)
     implicit def number2EnrichedNumber[A](rep:A)(implicit n:Numeric[A]) = new EnrichedNumber(rep)
     implicit def string2EnrichedString(x:String):EnrichedString = new EnrichedString(x)

@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.protocol
 
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 import com.deweyvm.dogue.common.logging.Log
 
 trait DogueMessage {

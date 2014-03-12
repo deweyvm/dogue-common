@@ -3,8 +3,8 @@ package com.deweyvm.dogue.common.data
 import org.scalacheck.Prop.forAll
 import org.scalacheck.{Gen, Arbitrary}
 import com.deweyvm.dogue.common.testing.Test
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 
 object LockedQueue {
   implicit def arbQ[T](implicit a:Arbitrary[T]):Arbitrary[LockedQueue[T]] =

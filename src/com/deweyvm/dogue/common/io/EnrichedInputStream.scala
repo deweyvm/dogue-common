@@ -2,7 +2,7 @@ package com.deweyvm.dogue.common.io
 
 import java.io.InputStream
 import com.deweyvm.dogue.common.data.Encoding
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 import com.deweyvm.dogue.common.io
 import scala.annotation.tailrec
 import com.deweyvm.dogue.common.io.NetworkData.{Data, NoneAvailable}

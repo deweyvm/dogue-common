@@ -1,8 +1,8 @@
 package com.deweyvm.dogue.common.procgen.voronoi
 
 import com.deweyvm.dogue.common.procgen.{Node, Polygon, Graph}
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 object VoronoiGraph {
   def makeGraph(faces:Vector[Polygon]):Graph[Polygon, Vector] = {
     val nodes : Map[Polygon, Node[Polygon, Vector]] = {

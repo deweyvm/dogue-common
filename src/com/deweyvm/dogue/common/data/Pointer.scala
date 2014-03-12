@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 
 object Pointer {
   def create[T](elts:Vector[T], reqPtr:Int):Pointer[T] = {

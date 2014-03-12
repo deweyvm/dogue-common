@@ -1,8 +1,8 @@
 package com.deweyvm.dogue.common.data
 
 import scala.collection.mutable.ArrayBuffer
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 
 //code page 437
 //uppercase special characters are suffixed with _u due to the possible error:

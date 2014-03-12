@@ -1,7 +1,7 @@
 package com.deweyvm.dogue.common.io
 
 import java.net.{ServerSocket, Socket}
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 import com.deweyvm.dogue.common.protocol.{DogueOps, Invalid, Command, DogueMessage}
 import scala.collection.mutable.ArrayBuffer
 import com.deweyvm.dogue.common.parsing.CommandParser

@@ -1,7 +1,7 @@
 package com.deweyvm.dogue.common.protocol
 
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 
 trait LocalMessage {
   def toDogueMessage(src:String, dest:String):DogueMessage

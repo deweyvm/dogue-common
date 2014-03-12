@@ -21,7 +21,7 @@
 
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 import com.deweyvm.dogue.common.logging.Log
 import java.util.FormatFlagsConversionMismatchException
 

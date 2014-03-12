@@ -3,8 +3,8 @@ package com.deweyvm.dogue.common.procgen
 import scala.util.Random
 import com.deweyvm.dogue.common.data.Array2d
 import com.deweyvm.gleany.data.{Timer, Point2d}
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 import scala.collection.immutable.IndexedSeq
 
 object Hex {

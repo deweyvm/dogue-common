@@ -1,8 +1,8 @@
 package com.deweyvm.dogue.common.procgen
 
 import com.deweyvm.gleany.data.Point2d
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 
 object Polygon {
   def fromLines(lines:Vector[Line]) = lines match {

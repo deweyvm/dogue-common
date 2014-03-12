@@ -1,7 +1,7 @@
 package com.deweyvm.dogue.common.threading
 
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 
 object DogueFuture {
   def createAndRun[T](f:() => T):DogueFuture[T] = {

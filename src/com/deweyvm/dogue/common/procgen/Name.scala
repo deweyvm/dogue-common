@@ -1,6 +1,6 @@
 package com.deweyvm.dogue.common.procgen
 
-import com.deweyvm.dogue.common.Implicits._
+import com.deweyvm.dogue.common.CommonImplicits._
 import scala.util.Random
 import scala.language.implicitConversions
 object Name {

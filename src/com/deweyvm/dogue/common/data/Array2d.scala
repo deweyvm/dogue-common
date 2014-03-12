@@ -4,8 +4,8 @@ import org.scalacheck.{Prop, Gen, Arbitrary}
 import scala.util.Random
 import com.deweyvm.dogue.common.testing.Test
 import scala.Some
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 import scala.collection.mutable
 
 object Array2d {

@@ -6,8 +6,8 @@ import java.awt.Color
 import javax.imageio.ImageIO
 import java.io.File
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 import com.deweyvm.gleany.graphics
 import com.deweyvm.gleany.data.{Point2i, Point2d}
 

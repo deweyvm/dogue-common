@@ -4,8 +4,8 @@ import com.deweyvm.dogue.common.procgen.{Graph, Node, Polygon, Line}
 import com.deweyvm.gleany.data.{Recti, Rectd, Point2d}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks
-import com.deweyvm.dogue.common.Implicits
-import Implicits._
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 import scala.util.Random
 
 object Voronoi {

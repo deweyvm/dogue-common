@@ -19,7 +19,7 @@ object Array2d {
   }
 
   def parTabulate[T](cols:Int, rows:Int)(f:(Int,Int) => T):Array2d[T] = {
-    val elts = (0 until cols*rows).toVector.par.map { k =>
+    val elts = (0 until cols*rows).par.map { k =>
       val (i, j) = indexToCoords(k, cols)
       f(i, j)
     }

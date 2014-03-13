@@ -118,29 +118,24 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, scale, dd)
   }
 
-  def perlinWind(solidElevation:Double, noise:Array2dView[Double], width:Int, height:Int, scale:Int, seed:Long) = {
+
+  def perlinWind(solidElevation:Double, noise:Array2dView[Double], heightMax:Double, windMax:Double, width:Int, height:Int, scale:Int, seed:Long) = {
+    val random = new Random(seed)
+    val xCenter = (random.nextDouble - 0.5)/10
+    val yCenter = (random.nextDouble - 0.5)/10
     def pow(k:Double) = math.pow(k, 1.25)
-    def getInfluence(i:Double, j:Double):Point2d = {
-      val atPoint = noise.get(i.toInt, j.toInt)
-      val factor =
-        if (atPoint < solidElevation) {
-          math.abs(atPoint).clamp(0,0.02)
-        } else {
-          atPoint.clamp(0,0.12)
-        }
-      gradient(noise, i.toInt, j.toInt).rotate(-Angles.Tau/4)*(factor/50)
-    }
-    def xx(i:Double) = 0.5 - i/width
-    def yy(j:Double) = 0.5 - j/height
     def dd(i:Double, j:Double):Point2d = {
-      val x = xx(i)
-      val y = yy(j)
+      val x = 0.5 - i/width + xCenter
+      val y = 0.5 - j/height + yCenter
       val p = Point2d(x, y)
       val mag = pow(0.3) - pow(p.magnitude)
-      val norm = p.normalize
-      val influence = getInfluence(i, j)
-      val result = (mag *: Point2d(norm.y, -norm.x)) + influence
-      result*2
+      val randRot = (random.nextDouble - 0.5)/2
+      val norm = p.normalize.rotate(randRot)
+      val grad = gradient(noise, i.toInt, j.toInt).rotate(Angles.Tau/4 - 0.1)
+      val h = noise.get(i.toInt, j.toInt)
+      val heightMag:Double = (h > 0).select((h/heightMax)*windMax, 0.0)
+      val result = (mag + heightMag) *: (grad + Point2d(norm.y, -norm.x))// + influence
+      result
     }
     new VectorField(0, 0, width, height, scale, dd)
   }
@@ -192,9 +187,9 @@ object VectorField {
     new VectorField(-width, -height, 2*width, 2*height, 40, dd)
   }
 
-  def magToColor(mag:Double):Color = {
+  def magToColor(mag:Double, max:Double):Color = {
     //Color.fromHsb((mag.toFloat/100 + 0.45f) % 1)
-    Color.fromHsb((mag.toFloat + 0.35f) % 1)
+    Color.fromHsb((1 - (mag/max).toFloat) % 0.5f)
   }
 
 }
@@ -209,8 +204,8 @@ class VectorField(x:Int, y:Int, width:Int, height:Int, div:Int, dd:(Double, Doub
 
   private def getArrow(i:Double, j:Double) = {
     val v = dd(i, j)
-    val mag = v.magnitude.clamp(0.01,50)
-    val color = VectorField.magToColor(mag)
+    val mag = v.magnitude.clamp(0,Int.MaxValue)
+    val color = VectorField.magToColor(mag, 1)
     val d = v.normalize
     (Point2d(i*div, j*div), Arrow(d, mag), color)
   }

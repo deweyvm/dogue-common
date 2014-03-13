@@ -131,7 +131,7 @@ object VectorField {
       val mag = pow(0.3) - pow(p.magnitude)
       val randRot = (random.nextDouble - 0.5)/2
       val norm = p.normalize.rotate(randRot)
-      val grad = gradient(noise, i.toInt, j.toInt).rotate(Angles.Tau/4 - 0.1)
+      val grad = gradient(noise, i.toInt, j.toInt).rotate(Angles.Tau/4 - 0.1)/heightMax
       val h = noise.get(i.toInt, j.toInt)
       val heightMag:Double = (h > 0).select((h/heightMax)*windMax, 0.0)
       val result = (mag + heightMag) *: (grad + Point2d(norm.y, -norm.x))// + influence

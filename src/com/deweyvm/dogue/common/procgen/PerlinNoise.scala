@@ -65,18 +65,9 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
     }
   }
 
-
-
-  /*def lazyRender:Lazy2d[Double] = {
-    def func(x:Int, y:Int) = {
-      fBm(freq*x, freq*y, (size*freq).toInt, octaves)
-    }
-    Lazy2d.tabulate(size, size)(func)
-  }*/
-
   def render:Array2d[Double] = {
-    Array2d.parTabulate(size, size) { case (x, y) =>
-      fBm(freq*x, freq*y, (size*freq).toInt, octaves)
+    Array2d.parTabulate(size + size/7, size + size/7) { case (x, y) =>
+      fBm(freq*(x + size/7), freq*(y + size/7), (size*freq).toInt, octaves)
     }
   }
 
@@ -92,8 +83,5 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
     result append "%f, %f\n" format (rendered.max, rendered.min)
     result.mkString
   }
-
-
-
 
 }

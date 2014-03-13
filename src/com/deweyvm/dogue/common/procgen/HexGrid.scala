@@ -130,12 +130,12 @@ class HexGrid(val hexSize:Double, cols:Int, rows:Int, distortion:Double, seed:Lo
       val x = x0
       val y = y0 + yOffset
       for {
-        UL <- hexes.get(x,     y)
-        UR <- hexes.get(x + 1, y)
-        L  <- hexes.get(x,     y + 1)
-        R  <- hexes.get(x + 1, y + 1)
-        LL <- hexes.get(x,     y + 2)
-        LR <- hexes.get(x + 1, y + 2)
+        UL <- hexes.getOption(x,     y)
+        UR <- hexes.getOption(x + 1, y)
+        L  <- hexes.getOption(x,     y + 1)
+        R  <- hexes.getOption(x + 1, y + 1)
+        LL <- hexes.getOption(x,     y + 2)
+        LR <- hexes.getOption(x + 1, y + 2)
         poly <- Polygon.fromPoints(Vector(UL, UR, R, LR, LL, L))
       } yield {
         poly

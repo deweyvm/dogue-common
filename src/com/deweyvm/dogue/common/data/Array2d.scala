@@ -53,9 +53,9 @@ object Array2d {
     val prop = Prop.forAll { a:Array2d[Int] =>
       var fail = true
       a.foreach( {case (i, j, t) =>
-        val x = a.unsafeGet(i, j)
+        val x = a.get(i, j)
         val (ii, jj) = indexToCoords(coordsToIndex(i, j, a.cols), a.cols)
-        val y = a.unsafeGet(ii, jj)
+        val y = a.get(ii, jj)
         fail &&= x == y
       })
       fail
@@ -67,25 +67,18 @@ object Array2d {
 
 
 
-class Array2d[T](private val elements:mutable.ArraySeq[T], cols_ :Int, rows_ :Int) {
+class Array2d[T](private val elements:mutable.ArraySeq[T],
+                 override val cols :Int,
+                 override val rows :Int) extends Array2dView[T] {
   outer =>
   import Array2d._
 
-  def rows = rows_
-  def cols = cols_
-
   def strictGetAll:IndexedSeq[T] = elements
 
-  def foreach(f:(Int,Int,T) => Unit) {
-    elements.zipWithIndex foreach { case (t, k) =>
-      val (i, j) = indexToCoords(k, cols)
-      f(i, j, t)
-    }
-  }
 
-  def map[K](f:(Int,Int,T)=>K) = {
+  def transform[K](f:(Int,Int,T)=>K) = {
     Array2d.tabulate(cols, rows) { case (i, j) =>
-      val elt = unsafeGet(i, j)
+      val elt = get(i, j)
       f(i, j, elt)
     }
   }
@@ -104,41 +97,16 @@ class Array2d[T](private val elements:mutable.ArraySeq[T], cols_ :Int, rows_ :In
     }
   }
 
-  private def unsafeGet(i:Int, j:Int):T = {
+  def get(i:Int, j:Int):T = {
     val k = coordsToIndex(i, j, cols)
     elements(k)
   }
 
-  def get(i:Int, j:Int):Option[T] = {
-    val k = coordsToIndex(i, j, cols)
-    if (k < 0 || k > cols*rows - 1)  {
+  def getOption(i:Int, j:Int):Option[T] = {
+    if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
       None
     } else {
-      Some(elements(k))
-    }
-  }
-
-  /*def slice(x:Int, y:Int, width:Int, height:Int, default:T):Array2dView[T] = new Array2dView[T] {
-    val cols = width
-    val rows = height
-    def get(i:Int, j:Int):T = {
-      outer.get(i + x, j + y).getOrElse(default)
-    }
-  }
-
-  def sample(div:Int):Array2dView[T] = new Array2dView[T] {
-    val cols = outer.cols/div
-    val rows = outer.rows/div
-    def get(i:Int, j:Int):T = {
-      unsafeGet(i*div, j*div)
-    }
-  }*/
-
-  def view:Array2dView[T] = new Array2dView[T] {
-    val cols = outer.cols
-    val rows = outer.rows
-    def get(i:Int, j:Int):T = {
-      unsafeGet(i, j)
+      get(i, j).some
     }
   }
 }

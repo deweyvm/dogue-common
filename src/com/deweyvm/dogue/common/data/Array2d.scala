@@ -23,7 +23,7 @@ object Array2d {
       val (i, j) = indexToCoords(k, cols)
       f(i, j)
     }
-    new Array2d(mutable.ArraySeq(elts.toVector:_*), cols, rows)
+    new Array2d(mutable.ArraySeq(elts.seq:_*), cols, rows)
   }
 
   /**
@@ -35,8 +35,8 @@ object Array2d {
 
   def unsafeGetElements[T](a:Array2d[T]):IndexedSeq[T] = a.elements
 
-  @inline def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
-  @inline def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
+  def indexToCoords(k:Int, cols:Int):(Int,Int) = (k % cols, k / cols)
+  def coordsToIndex(i:Int, j:Int, cols:Int):Int = i + j*cols
 
   def test() {
     implicit def arbA2d:Arbitrary[Array2d[Int]] =

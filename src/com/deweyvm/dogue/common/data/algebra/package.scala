@@ -1,19 +1,16 @@
 package com.deweyvm.dogue.common.data
 
-import com.deweyvm.dogue.common.CommonImplicits
-import CommonImplicits._
-
 
 package object algebra {
   object Algebra {
-    implicit def VectorWriterUtil[A](a:A) = new {
+
+    implicit class VectorWriterUtil[A](a:A) {
       def ~>[B](bool:Boolean, b: => B): EitherWriter[Vector[A], B] = {
         if (!bool) {
-          EitherWriter(Vector(a), Left(Vector(a)))
+          EitherWriter(Vector(a), None)
         } else {
-          EitherWriter(Vector(), Right(b))
+          EitherWriter(Vector(), Some(b))
         }
-
       }
     }
   }

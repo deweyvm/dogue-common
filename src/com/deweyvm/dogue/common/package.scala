@@ -5,7 +5,6 @@ import scala.language.implicitConversions
 import com.deweyvm.dogue.common.data._
 import com.deweyvm.dogue.common.io.{EnrichedInputStream, EnrichedOutputStream, EnrichedSocket}
 import java.io.{OutputStream, InputStream}
-import com.deweyvm.dogue.common.data.serialization.Writable
 
 package object common {
   def id[T](x:T) = x

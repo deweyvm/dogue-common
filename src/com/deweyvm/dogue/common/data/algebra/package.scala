@@ -5,11 +5,11 @@ package object algebra {
   object Algebra {
 
     implicit class VectorWriterUtil[A](a:A) {
-      def ~>[B](bool:Boolean, b: => B): EitherWriter[Vector[A], B] = {
+      def ~|>[B](bool:Boolean, b: => B): Writer[Vector[A], B] = {
         if (!bool) {
-          EitherWriter(Vector(a), None)
+          Writer(Vector(a), None)
         } else {
-          EitherWriter(Vector(), Some(b))
+          Writer(Vector(), Some(b))
         }
       }
     }

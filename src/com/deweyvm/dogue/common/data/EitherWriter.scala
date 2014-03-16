@@ -3,21 +3,19 @@ package com.deweyvm.dogue.common.data
 import com.deweyvm.dogue.common.data.algebra.Monoid
 import com.deweyvm.dogue.common.CommonImplicits
 import CommonImplicits._
+import scala.collection.mutable.ArrayBuffer
 
 object EitherWriter {
   def unit[W, A](value:A)(implicit m:Monoid[W]) = EitherWriter(m.zero, value.some)
   def sequence[W, A](elts:Seq[EitherWriter[W,A]])(implicit m:Monoid[W]):EitherWriter[W,Seq[A]] = {
-    val first = elts.headOption.map{_.map{Seq(_)}}
-    val base:EitherWriter[W,Seq[A]] = first.getOrElse(EitherWriter(m.zero, None))
-    val result = elts.drop(1).foldLeft(base) { case (acc, elt) =>
-      for {
-        a <- acc
-        e <- elt
-      } yield {
-         e +: a
-      }
+    val success = ArrayBuffer[A]()
+    val fail = ArrayBuffer[W]()
+    elts foreach {
+      case EitherWriter(log, None) => fail += log
+      case EitherWriter(log, Some(a)) => success += a
+
     }
-    result
+    EitherWriter(fail.foldLeft(m.zero)(m.+), success.toSeq.some)
   }
 }
 
@@ -40,6 +38,6 @@ case class EitherWriter[W, +A](log:W, value:Option[A]) {
 
   def toEither(isEmpty:W => Boolean):Either[W, A] = value match {
     case Some(a) if isEmpty(log) => Right(a)
-    case None => Left(log)
+    case _ => Left(log)
   }
 }

@@ -12,6 +12,9 @@ object DogueFuture {
         setResult(res)
         kill()
       }
+      override def exception(e:Exception) {
+
+      }
       private def setResult(r:Option[T]) = synchronized {
         result = r
       }

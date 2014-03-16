@@ -11,12 +11,17 @@ object Writer {
   def sequence[W, A](elts:Seq[Writer[W,A]])(implicit m:Monoid[W]):Writer[W,Seq[A]] = {
     val success = ArrayBuffer[A]()
     val fail = ArrayBuffer[W]()
+    val files = ArrayBuffer[W]()
     elts foreach {
-      case Writer(log, None,_) => fail += log
-      case Writer(log, Some(a),_) => success += a
+      case Writer(log, None, x) =>
+        fail += log
+        x foreach {files += _}
+      case Writer(log, Some(a), x) =>
+        success += a
+        x foreach {files += _}
 
     }
-    Writer(fail.foldLeft(m.zero)(m.+), success.toSeq.some)
+    Writer(fail.foldLeft(m.zero)(m.+), success.toSeq.some, files.headOption)
   }
 }
 

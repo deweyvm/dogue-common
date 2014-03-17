@@ -76,7 +76,7 @@ class Array2d[T](private val elements:mutable.ArraySeq[T],
   def strictGetAll:IndexedSeq[T] = elements
 
 
-  def transform[K](f:(Int,Int,T)=>K) = {
+  def map[K](f:(Int,Int,T)=>K) = {
     Array2d.tabulate(cols, rows) { case (i, j) =>
       val elt = get(i, j)
       f(i, j, elt)

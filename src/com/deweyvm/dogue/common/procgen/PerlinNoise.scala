@@ -4,7 +4,8 @@ import scala.collection.immutable.IndexedSeq
 import scala.util.Random
 import com.deweyvm.dogue.common.data.{Angles, Array2d}
 import scala.math._
-
+import com.deweyvm.dogue.common.CommonImplicits
+import CommonImplicits._
 object PerlinNoise {
   def default = {
     new PerlinNoise(1/2048.0, 14, 4096, 0)
@@ -66,21 +67,26 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
   }
 
   def render:Array2d[Double] = {
-    Array2d.parTabulate(size + size/7, size + size/7) { case (x, y) =>
+    val raw = Array2d.parTabulate(size + size/7, size + size/7) { case (x, y) =>
       fBm(freq*(x + size/7), freq*(y + size/7), (size*freq).toInt, octaves)
     }
+    val max = math.max(raw.max, -raw.min)
+    val result = raw.map { case (i, j, d) =>
+      d * (1/max)
+    }
+    printFrequencies(result).println()
+    result
   }
 
   def printFrequencies(rendered:Array2d[Double]):String = {
     val result = new StringBuilder
     val grouped = rendered.groupBy(d => (d*10).toInt)
-    for (i <- -10 until 10) {
-      if (grouped.contains(i)) {
-        result append i.toString
-        result append ("    " + grouped(i).length + "\n")
-      }
+    (-10 to 10).filter(grouped.contains) foreach { i =>
+      result append i.toString
+      result append ("    " + grouped(i).length + "\n")
     }
-    result append "%f, %f\n" format (rendered.max, rendered.min)
+
+    result append ("%.2f <=> %.2f\n" format (rendered.min, rendered.max))
     result.mkString
   }
 

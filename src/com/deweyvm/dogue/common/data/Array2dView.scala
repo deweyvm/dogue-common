@@ -29,7 +29,7 @@ trait Array2dView[T] {
     }
   }
 
-  def map[K](f:(Int, Int, T) => K):Array2dView[K] = new Array2dView[K] {
+  def viewMap[K](f:(Int, Int, T) => K):Array2dView[K] = new Array2dView[K] {
     val cols = outer.cols
     val rows = outer.rows
     def get(i:Int, j:Int):K = {

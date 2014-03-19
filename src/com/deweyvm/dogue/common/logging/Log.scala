@@ -30,9 +30,7 @@ class LogLevel(val marker:String, val loudness:Int) {
 
 object Log {
   def formatStackTrace(ex:Throwable):String = {
-    ("Failure:\nException in thread " + Thread.currentThread.getName + ": "
-    + ex.toString + '\n'
-    + ex.getStackTraceString.indent(8))
+    "Failure:%nException in thread \"%s\": %s%n%s" format(Thread.currentThread.getName,ex.toString, ex.getStackTraceString.indent(8))
   }
 
   case object All extends LogLevel("ALL ", Int.MaxValue)

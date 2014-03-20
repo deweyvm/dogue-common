@@ -16,7 +16,7 @@ object Pointer {
 
 class Pointer[T] private (elts:Vector[T], ptr:Int) {
   def get:T = elts(ptr)
-  def mapOne[K](f:T => T):Pointer[T] = {
+  def getMap[K](f:T => T):Pointer[T] = {
     new Pointer[T](elts.updated(ptr, f(get)), ptr)
   }
 

@@ -15,12 +15,17 @@ object Pointer {
 }
 
 class Pointer[T] private (elts:Vector[T], ptr:Int) {
+  def toSeq = elts.toSeq
   def get:T = elts(ptr)
   def getMap[K](f:T => T):Pointer[T] = {
     new Pointer[T](elts.updated(ptr, f(get)), ptr)
   }
 
-  def foreach(selected:T => Unit, notSelected:T => Unit):Unit = elts.zipWithIndex foreach { case (t, i) =>
+  def map[K](f:T => K):Pointer[K] = {
+    new Pointer[K](elts map f, ptr)
+  }
+
+  def selectMap[K](selected:T => K, notSelected:T => K): Seq[K] = elts.zipWithIndex map { case (t, i) =>
     if (ptr == i) {
       selected(t)
     } else {

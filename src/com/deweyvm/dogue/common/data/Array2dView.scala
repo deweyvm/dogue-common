@@ -29,6 +29,10 @@ trait Array2dView[T] {
     }
   }
 
+  def foldLeft[B](z: B)(op: (B, T) => B) = {
+    toVector.foldLeft(z)(op)
+  }
+
   def viewMap[K](f:(Int, Int, T) => K):Array2dView[K] = new Array2dView[K] {
     val cols = outer.cols
     val rows = outer.rows

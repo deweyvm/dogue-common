@@ -64,26 +64,15 @@ class EnrichedString(self:String) {
     lines ++ Vector(last)
   }
 
-  def toLines(width:Int):Vector[String] =  {
-    /*val grouped = self.grouped(width - 1)
-    grouped.zipWithIndex.map { case (s, i) =>
-      if (s.length == width - 1 && i < grouped.length - 1) {
-        s + "-"
-      } else {
-        s
-      }
-    }.toVector*/
-    val (last, lines) = self.foldLeft(("", Vector[String]())){
-      case ((currentLine, lines), c) =>
-        val added = currentLine + c
-        if (added.length == width) {
-          val hyphen = if (c == ' ') "" else  "-"
-          ("", lines ++ Vector(added + hyphen))
-        } else {
-          (added, lines)
-        }
+  def toLines(width:Int):Vector[String] = {
+    val grouped = self.grouped(width - 1).toVector
+    if (grouped.length <= 1) {
+      grouped
+    } else {
+      val (start, last) = grouped.splitAt(grouped.length - 1)
+      start.map {_ + "-"} ++ last
     }
-    lines ++ Vector(last)
+
 
   }
 

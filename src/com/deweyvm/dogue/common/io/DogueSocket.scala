@@ -91,6 +91,8 @@ class DogueSocket(val serverName:String, socket:Socket) {
   def close() {
     try {
       socket.close()
+    } catch {
+      case t:Exception => ()
     }
   }
 

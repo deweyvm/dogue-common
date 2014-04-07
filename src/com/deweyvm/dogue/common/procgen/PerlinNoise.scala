@@ -16,7 +16,7 @@ object PerlinNoise {
   }
 }
 
-class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
+class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) extends Noise {
   def this(p:PerlinParams) = this(1/p.period.toFloat, p.octaves, p.size, p.seed)
   private val whatDoesThisVariableMean = size
   private val random = new Random(seed)
@@ -59,7 +59,7 @@ class PerlinNoise(freq:Double, octaves:Int, val size:Int, seed:Long) {
   private def fBm(x: Double, y: Double, per: Int, octs: Int): Double = {
     import scala.math._
     (0 until octs).foldRight(0.0) { case (i, acc) =>
-      val p =pow(2, i).toInt //2 << i ?
+      val p = pow(2, i).toInt //2 << i ?
       val xArg: Double = x * p
       val yArg: Double = y * p
       acc + pow(0.5, i).toFloat * noise(xArg, yArg, per * p)

@@ -1,14 +1,8 @@
 package com.deweyvm.dogue.common.procgen
 
 import scala.util.Random
+import com.deweyvm.dogue.common.data.Array2d
 
-class Noise(cols:Int, rows:Int, seed:Long) {
-
-  def get(x:Int, y:Int):Int = {
-    val h = hash(x, y)
-    Random.setSeed(h + seed)
-    Random.nextInt()
-  }
-
-  private def hash(x:Int, y:Int):Long = (x << 32) | y
+trait Noise {
+  def render:Array2d[Double]
 }
